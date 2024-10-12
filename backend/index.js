@@ -51,7 +51,11 @@ app.post("/errors", async (req, res) => {
 		if (matchedGroup.solution === null) {
 			res.status(201).json({ message: "Error data received and saved."});
 		} else {
-			res.status(200).json({ message: "Solution for this error exists", link: generateLink(matchedGroup.solution)});
+			const solution = await logService.getSolution({uniqueId: matchedGroup.solution});
+			res.status(200).json({ 
+				message: "Solution for this error exists", 
+				link: generateLink(matchedGroup.solution),
+				commands: solution.commands });
 		}
 	} catch (error) {
 		if (error.code === 11000) {
