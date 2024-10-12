@@ -45,14 +45,31 @@ const FrequentErrors = () => {
   const compiledData = compileData(errorData);
   compiledData.sort((a, b) => b.count - a.count);
   return (
-    <DashboardCard title="Frequent Errors">
-      <Box
-        sx={{
-          overflow: "auto",
-          height: "24vh",
-          width: { xs: "280px", sm: "auto" },
-        }}
-      >
+      <DashboardCard title="Frequent Errors">
+          <Box
+              sx={{
+                  overflow: "auto",
+                  height: "24vh",
+                  width: { xs: "280px", sm: "auto" },
+                  // Scrollbar styling for webkit browsers (Chrome, Safari, newer versions of Edge)
+                  '&::-webkit-scrollbar': {
+                      width: '6px',
+                  },
+                  '&::-webkit-scrollbar-track': {
+                      background: 'rgba(0, 0, 0, 0.1)',
+                  },
+                  '&::-webkit-scrollbar-thumb': {
+                      background: 'rgba(0, 0, 0, 0.2)',
+                      borderRadius: '3px',
+                  },
+                  '&::-webkit-scrollbar-thumb:hover': {
+                      background: 'rgba(0, 0, 0, 0.3)',
+                  },
+                  // Scrollbar styling for Firefox
+                  scrollbarWidth: 'thin',
+                  scrollbarColor: 'rgba(0, 0, 0, 0.2) rgba(0, 0, 0, 0.1)',
+              }}
+          >
         <Table
             aria-label="simple table"
             sx={{
