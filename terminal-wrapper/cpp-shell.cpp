@@ -9,6 +9,15 @@
 #include <uuid/uuid.h>
 #include <sstream>
 #include <algorithm>
+#include <limits.h> // For PATH_MAX
+
+// ANSI color codes for terminal styling
+#define RESET "\033[0m"
+#define RED "\033[31m"
+#define GREEN "\033[32m"
+#define YELLOW "\033[33m"
+#define BLUE "\033[34m"
+#define BOLD "\033[1m"
 
 // Function to read the username from keys.env
 std::string read_username_from_env() {
@@ -17,14 +26,14 @@ std::string read_username_from_env() {
     std::string username;
     if (env_file.is_open()) {
         while (getline(env_file, line)) {
-            if (line.find("USERNAME=") == 0) {
+            if (line.find("username=") == 0) {
                 username = line.substr(9); // Extract username after "USERNAME="
                 break;
             }
         }
         env_file.close();
     } else {
-        std::cerr << "Unable to open keys.env file. Please make sure it exists." << std::endl;
+        std::cerr << RED << "\nUnable to open keys.env file. Please make sure it exists." << RESET << std::endl;
         exit(1);
     }
     return username;
@@ -73,7 +82,7 @@ void send_error_to_server(const std::string& username, const std::string& unique
         std::stringstream json_payload;
         json_payload << "{"
                      << "\"uniqueId\":\"" << unique_id << "\","
-                     << "\"username\":\"" << "emaan" << "\","
+                     << "\"username\":\"" << username << "\","
                      << "\"errorData\": {"
                      << "\"command\":\"" << command << "\","
                      << "\"error\":\"" << escape_json_string(error_message) << "\""
@@ -94,9 +103,9 @@ void send_error_to_server(const std::string& username, const std::string& unique
         // Perform the request
         CURLcode res = curl_easy_perform(curl);
         if(res != CURLE_OK) {
-            std::cerr << "Failed to send error to server: " << curl_easy_strerror(res) << std::endl;
+            std::cerr << RED << "\nFailed to send error to server: " << curl_easy_strerror(res) << RESET << std::endl;
         } else {
-            std::cout << "Error data sent to server successfully!" << std::endl;
+            std::cout << GREEN << "\nError data sent to server successfully!" << RESET << std::endl;
         }
 
         // Cleanup
@@ -105,12 +114,22 @@ void send_error_to_server(const std::string& username, const std::string& unique
     }
 }
 
+// Function to get the current working directory for the shell prompt
+std::string get_current_directory() {
+    char cwd[PATH_MAX];
+    if (getcwd(cwd, sizeof(cwd)) != nullptr) {
+        return std::string(cwd);
+    } else {
+        return std::string("unknown");
+    }
+}
+
 // Function to execute a command and handle errors
 void execute_command(char* args[], const std::string& username) {
     pid_t pid = fork();
 
     if (pid < 0) {
-        std::cerr << "Fork failed" << std::endl;
+        std::cerr << RED << "Fork failed" << RESET << std::endl;
         return;
     }
 
@@ -119,7 +138,7 @@ void execute_command(char* args[], const std::string& username) {
         // Redirect stderr to a temporary file
         int error_log_fd = open("error_log.txt", O_WRONLY | O_CREAT | O_TRUNC, 0666);
         if (error_log_fd == -1) {
-            std::cerr << "Error opening log file" << std::endl;
+            std::cerr << RED << "\nError opening log file" << RESET << std::endl;
             exit(1);
         }
 
@@ -129,7 +148,7 @@ void execute_command(char* args[], const std::string& username) {
 
         // Execute the command
         if (execvp(args[0], args) == -1) {
-            std::cerr << "Command execution failed" << std::endl;
+            std::cerr << RED << "\nCommand execution failed" << RESET << std::endl;
         }
         exit(1); // Exit child process if execvp fails
     } else {
@@ -138,7 +157,7 @@ void execute_command(char* args[], const std::string& username) {
         waitpid(pid, &status, 0); // Wait for child process to complete
 
         if (WIFEXITED(status) && WEXITSTATUS(status) != 0) {
-            std::cout << "Command failed with exit code " << WEXITSTATUS(status) << std::endl;
+            std::cout << YELLOW << "Command failed with exit code " << WEXITSTATUS(status) << RESET << std::endl;
 
             // Read the error message from the log file
             std::ifstream error_log("error_log.txt");
@@ -154,6 +173,8 @@ void execute_command(char* args[], const std::string& username) {
 
             // Send the error data to the server
             send_error_to_server(username, unique_id, args[0], error_message);
+        } else {
+            std::cout << GREEN << "\nCommand executed successfully!" << RESET << std::endl;
         }
     }
 }
@@ -166,8 +187,13 @@ int main() {
     std::string username = read_username_from_env();
 
     while (true) {
-        // Prompt for input
-        std::cout << "cpp-shell> ";
+        // Get the current working directory for the shell prompt
+        std::string cwd = get_current_directory();
+
+        // Display a colorful prompt (e.g., "cpp-shell:~/current/directory>")
+        std::cout << BLUE << "error-shell:" << BOLD << cwd << RESET << "> ";
+
+        // Get the command input from the user
         std::cin.getline(command, 256);
 
         // Parse the command
@@ -181,6 +207,7 @@ int main() {
 
         // Exit the shell if the user types "exit"
         if (strcmp(args[0], "exit") == 0) {
+            std::cout << GREEN << "\nExiting cpp-shell. Goodbye!" << RESET << std::endl;
             break;
         }
 
