@@ -52,154 +52,111 @@ export function compileData(errorData: ErrorItem[]) {
 
   return compiledData;
 }
-
 const FrequentErrors = () => {
   const errorData = useContext(ErrorContext) ?? [];
   return (
-    <DashboardCard title="Frequent Errors">
-      <Box
-        sx={{
-          overflow: "auto",
-          height: "24vh",
-          width: { xs: "280px", sm: "auto" },
-        }}
-      >
-        <Table
-          aria-label="simple table"
-          sx={{
-            whiteSpace: "nowrap",
-            mt: 2,
-          }}
+      <DashboardCard title="Frequent Errors">
+        <Box
+            sx={{
+              overflow: "auto",
+              height: "24vh",
+              width: { xs: "280px", sm: "auto" },
+            }}
         >
-          <TableHead>
-            <TableRow>
-              <TableCell>
-                <Typography variant="subtitle2" fontWeight={600}>
-                  Command
-                </Typography>
-              </TableCell>
-              <TableCell>
-                <Typography variant="subtitle2" fontWeight={600}>
-                  Error
-                </Typography>
-              </TableCell>
-              <TableCell>
-                <Typography variant="subtitle2" fontWeight={600}>
-                  Priority
-                </Typography>
-              </TableCell>
-              <TableCell align="right">
-                <Typography variant="subtitle2" fontWeight={600}>
-                  Count
-                </Typography>
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {compileData(errorData).map((error, index) => (
-              <TableRow key={index}>
+          <Table
+              aria-label="simple table"
+              sx={{
+                whiteSpace: "nowrap",
+                mt: 2,
+                '& tbody tr': {
+                  transition: 'background-color 0.3s',
+                },
+                '& tbody tr:hover': {
+                  backgroundColor: 'rgba(50, 50, 50, 0.1)',
+                },
+              }}
+          >
+            <TableHead>
+              <TableRow>
                 <TableCell>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignitems: "center",
-                    }}
-                  >
-                    <Box>
-                      <Typography variant="subtitle1" fontWeight={600}>
-                        {error.command}
-                      </Typography>
-                      <Typography
-                        color="textSecondary"
-                        sx={{
-                          fontSize: "12px",
-                        }}
-                      >
-                        {error.error}
-                      </Typography>
-                    </Box>
-                  </Box>
-                </TableCell>
-                <TableCell>
-                  <Typography
-                    color="textSecondary"
-                    variant="subtitle1"
-                    fontWeight={399}
-                  >
-                    {error.command}
+                  <Typography variant="subtitle2" fontWeight={600}>
+                    Command
                   </Typography>
                 </TableCell>
                 <TableCell>
-                  <Chip
-                    sx={{
-                      px: "3px",
-                      backgroundColor: error.pbg,
-                      color: "#fff",
-                    }}
-                    size="small"
-                    label={error.priority}
-                  ></Chip>
+                  <Typography variant="subtitle2" fontWeight={600}>
+                    Error
+                  </Typography>
+                </TableCell>
+                <TableCell>
+                  <Typography variant="subtitle2" fontWeight={600}>
+                    Priority
+                  </Typography>
                 </TableCell>
                 <TableCell align="right">
-                  <Typography variant="h5">{error.count}</Typography>
+                  <Typography variant="subtitle2" fontWeight={600}>
+                    Count
+                  </Typography>
                 </TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </Box>
-    </DashboardCard>
+            </TableHead>
+            <TableBody>
+              {compileData(errorData).map((error, index) => (
+                  <TableRow
+                      key={index}
+                  >
+                    <TableCell>
+                      <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                          }}
+                      >
+                        <Box>
+                          <Typography variant="subtitle1" fontWeight={600}>
+                            {error.command}
+                          </Typography>
+                          <Typography
+                              color="textSecondary"
+                              sx={{
+                                fontSize: "12px",
+                              }}
+                          >
+                            {error.error}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </TableCell>
+                    <TableCell>
+                      <Typography
+                          color="textSecondary"
+                          variant="subtitle1"
+                          fontWeight={399}
+                      >
+                        {error.command}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                          sx={{
+                            px: "3px",
+                            backgroundColor: error.pbg,
+                            color: "#fff",
+                          }}
+                          size="small"
+                          label={error.priority}
+                      />
+                    </TableCell>
+                    <TableCell align="right">
+                      <Typography variant="h5">{error.count}</Typography>
+                    </TableCell>
+                  </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Box>
+      </DashboardCard>
   );
 };
-
-//{products.map((product) => (
-//<TableRow key={product.name}>
-//<TableCell>
-//<Box
-//sx={{
-//display: "flex",
-//alignItems: "center",
-//}}
-//>
-//<Box>
-//<Typography variant="subtitle1" fontWeight={600}>
-//{product.name}
-//</Typography>
-//<Typography
-//color="textSecondary"
-//sx={{
-//fontSize: "12px",
-//}}
-//>
-//{product.post}
-//</Typography>
-//</Box>
-//</Box>
-//</TableCell>
-//<TableCell>
-//<Typography
-//color="textSecondary"
-//variant="subtitle1"
-//fontWeight={399}
-//>
-//{product.pname}
-//</Typography>
-//</TableCell>
-//<TableCell>
-//<Chip
-//sx={{
-//px: "3px",
-//backgroundColor: product.pbg,
-//color: "#fff",
-//}}
-//size="small"
-//label={product.priority}
-//></Chip>
-//</TableCell>
-//<TableCell align="right">
-//<Typography variant="h5">${product.budget}k</Typography>
-//</TableCell>
-//</TableRow>
-//))}
 
 export default FrequentErrors;
