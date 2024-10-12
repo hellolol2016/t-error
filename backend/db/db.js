@@ -62,6 +62,15 @@ class LogService {
 			console.error("[mongodb] error writing to MongoDB:", error);
 		}
 	}
+
+	async getSolution(query) {
+		try {
+			const solution = await SolutionLog.find(query);
+			return solution;
+		} catch (error) {
+			console.error("[mongodb] error writing to MongoDB:", error);
+		}
+	}
 }
 
 export default LogService;

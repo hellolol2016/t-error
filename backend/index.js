@@ -6,13 +6,13 @@ import MongoDBService from "./db/connection.js";
 import LogService from "./db/db.js";
 import ErrorGrouping from "./group_logs.js";
 import GroupLog from "./db/groupSchema.js";
-import { v4 as uuidv4 } from 'uuid';
+import dotenv from "dotenv";
 
 const COLLECTION_NAME = "errorLogs";
 const SIMILARITY_THRESHOLD = 0.8;
+const PORT = 3001;
 
 const app = express();
-const port = 3001;
 
 const mongodbService = new MongoDBService();
 await mongodbService.connect();
@@ -20,30 +20,42 @@ const logService = new LogService();
 
 const errorGrouping = new ErrorGrouping(SIMILARITY_THRESHOLD);
 
-// Middleware
 app.use(cors());
 app.use(bodyParser.json());
+dotenv.config({ path: "./keys.env" });
 
-// Route to receive error data
+function generateLink(solutionId) {
+    return `http://${process.env.HOST}:${PORT}/solution/${solutionId}`;
+}
+
 app.post("/errors", async (req, res) => {
 	try {
 		const { uniqueId, username, errorData } = req.body;
 
-		// Validate input
 		if (!uniqueId || !errorData) {
 			return res
 				.status(400)
 				.json({ message: "uniqueId and errorData are required." });
 		}
 
-		logService.writeErrorLog({ uniqueId, username, errorData });
+		await logService.writeErrorLog({ 
+			uniqueId, 
+			username, 
+			errorData });
 
-		console.log("Received and saved error data:", errorData);
-		res.status(201).json({ message: "Error data received and saved.", id: 0 });
+		const matchedGroup = await errorGrouping.matchAndStoreSingleLog({ 
+			uniqueId, 
+			username, 
+			errorData });
+
+		if (matchedGroup.solution === null) {
+			res.status(201).json({ message: "Error data received and saved."});
+		} else {
+			res.status(200).json({ message: "Solution for this error exists", link: generateLink(matchedGroup.solution)});
+		}
 	} catch (error) {
 		if (error.code === 11000) {
-		// Duplicate uniqueId error
-			res.status(409).json({ message: "uniqueId already exists." });
+			res.status(409).json({ message: "uniqueId already exists."});
 		} else {
 			console.error("Error saving data:", error);
 			res.status(500).json({ message: "Internal server error." });
@@ -69,7 +81,6 @@ app.post("/writeSolution", async (req, res) => {
 	}
 })
 
-// Route to retrieve error data by uniqueId
 app.get("/errors", async (req, res) => {
   try {
     const errorLog = await logService.readErrorLogs({});
@@ -96,14 +107,14 @@ app.get("/getErrorGroups", async (req, res) => {
   }
 });
 
+app.get("/getSolutions/:solutionId", async (req, res) => {
 
+})
 
-// Basic route to test server
 app.get("/", (req, res) => {
   res.send("Enhanced Error Monitoring Server is running.");
 });
 
-// Start the server
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
