@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useTheme } from "@mui/material/styles";
 import DashboardCard from "@/app/(DashboardLayout)/components/shared/DashboardCard";
-import { errorData } from "@/app/(DashboardLayout)/page";
 import { BarChart } from "@mui/x-charts";
 import { Box, Grid } from "@mui/material";
 import { ErrorContext } from "../../context/ErrorContext";
