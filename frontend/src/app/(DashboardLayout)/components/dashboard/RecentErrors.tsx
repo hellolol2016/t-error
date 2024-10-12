@@ -66,7 +66,6 @@ const RecentErrors = () => {
                 <span className="terminal-title">Terminal - Error Logs</span>
             </div>
 
-            {/* Move the search container above the terminal content */}
             <div className="search-container">
                 <div className="terminal-item-header">
                     <Search size={16} className="chevron-icon" />
@@ -108,5 +107,4 @@ const RecentErrors = () => {
         </div>
     );
 };
-
-export default RecentErrors;
+    export default RecentErrors;

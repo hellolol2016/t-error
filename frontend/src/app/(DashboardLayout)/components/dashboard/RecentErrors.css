@@ -101,3 +101,26 @@
 .search-result:hover {
     background-color: rgba(255, 255, 255, 0.1);
 }
+/* Scrollbar styles for WebKit-based browsers (Chrome, Safari, Edge) */
+.terminal-content::-webkit-scrollbar {
+    width: 5px;  
+}
+
+.terminal-content::-webkit-scrollbar-track {
+    background: #f1f1f1;  
+}
+
+.terminal-content::-webkit-scrollbar-thumb {
+    background-color: #10b981;  
+    border-radius: 5px;     
+}
+
+.terminal-content::-webkit-scrollbar-thumb:hover {
+    background-color: #10b981;  
+}
+
+/* Scrollbar styles for Firefox */
+.terminal-content {
+    scrollbar-width: thin;  
+    scrollbar-color: rgba(0, 255, 0, 0.25) black;
+}
