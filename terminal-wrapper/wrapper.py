@@ -5,6 +5,7 @@ import os
 import time
 from datetime import datetime
 import json
+import requests
 
 api_url = "http://localhost:3000/api/newError" 
 
@@ -35,10 +36,11 @@ def run_command(command):
             "command": command,
             "stderr": stderr,
         }
+        requests.post(url=api_url, json=json_object)
         print("An error occurred while executing the command at",timestamp,". Everyone laugh at user " + user_id)
         print("Error message:", stderr)
         print("Return code:", process.returncode)
-        print(json_object)
+        
         return False
 
 if len(sys.argv) > 1:
