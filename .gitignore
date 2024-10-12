@@ -4,7 +4,6 @@
 /node_modules
 /.pnp
 .pnp.js
-.yarn/install-state.gz
 
 # testing
 /coverage
@@ -27,7 +26,6 @@ yarn-error.log*
 
 # local env files
 .env*.local
-.env
 
 # vercel
 .vercel
@@ -35,19 +33,3 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-
-user_id.txt
-
-# vscode
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-!.vscode/*.code-snippets
-
-# Local History for Visual Studio Code
-.history/
-
-# Built Visual Studio Code Extensions
-*.vsix
