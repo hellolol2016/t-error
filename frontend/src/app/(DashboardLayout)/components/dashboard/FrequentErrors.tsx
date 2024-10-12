@@ -15,7 +15,7 @@ interface ErrorItem {
   errorData: { command: any; error: any };
 }
 
-function compileData(errorData: ErrorItem[]) {
+export function compileData(errorData: ErrorItem[]) {
   // Define priority mapping
   const priorityMapping: { [key: string]: string } = {
     "git pull": "Low",

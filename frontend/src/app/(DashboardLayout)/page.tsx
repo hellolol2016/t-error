@@ -2,11 +2,9 @@
 import { Grid, Box } from "@mui/material";
 import PageContainer from "@/app/(DashboardLayout)/components/container/PageContainer";
 // components
-import SalesOverview from "@/app/(DashboardLayout)/components/dashboard/SalesOverview";
-import YearlyBreakup from "@/app/(DashboardLayout)/components/dashboard/YearlyBreakup";
 import RecentErrors from "@/app/(DashboardLayout)/components/dashboard/RecentErrors";
 import FrequentErrors from "@/app/(DashboardLayout)/components/dashboard/FrequentErrors";
-import MonthlyEarnings from "@/app/(DashboardLayout)/components/dashboard/MonthlyEarnings";
+import ErrorOverview from "@/app/(DashboardLayout)/components/dashboard/ErrorOverview";
 
 export const errorData = [
   {
@@ -16,7 +14,7 @@ export const errorData = [
       command: "git pull",
       error: "error message",
     },
-    timestamp: "2024-10-12T04:30:33.346Z",
+    timestamp: "2024-10-12T00:30:33.346Z",
     v: 0,
   },
   {
@@ -56,7 +54,7 @@ export const errorData = [
       command: "poop",
       error: "/bin/sh: poop: command not found\n",
     },
-    timestamp: "2024-10-10T05:06:07.008Z",
+    timestamp: "2024-10-12T05:06:07.008Z",
     __v: 0,
   },
 ];
@@ -66,23 +64,13 @@ const Dashboard = () => {
     <PageContainer title="Dashboard" description="this is Dashboard">
       <Box>
         <Grid container spacing={3}>
-          <Grid item xs={12} lg={8}>
+          <Grid item xs={12} lg={11}>
             <RecentErrors />
           </Grid>
-          <Grid item xs={12} lg={4}>
-            <Grid container spacing={3}>
-              <Grid item xs={12}>
-                <YearlyBreakup />
-              </Grid>
-              <Grid item xs={12}>
-                <MonthlyEarnings />
-              </Grid>
-            </Grid>
+          <Grid item xs={12} lg={5}>
+            <ErrorOverview />
           </Grid>
-          <Grid item xs={12} lg={4}>
-            <SalesOverview />
-          </Grid>
-          <Grid item xs={12} lg={8}>
+          <Grid item xs={12} lg={6}>
             <FrequentErrors />
           </Grid>
         </Grid>
