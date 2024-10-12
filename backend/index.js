@@ -111,8 +111,20 @@ app.get("/getErrorGroups", async (req, res) => {
   }
 });
 
-app.get("/getSolutions/:solutionId", async (req, res) => {
+app.get("/getSolution/:solutionId", async (req, res) => {
+	try {
+		const solutionId = req.params.solutionId;
+		const solution = await logService.getSolution({ uniqueId: solutionId });
 
+		if (!solution) {
+			return res.status(404).json({ message: "Solution not found." });
+		}
+		
+		res.status(200).json(solution);
+	} catch (error) {
+		console.error("[server] error retrieving solution:", error);
+		res.status(500).json({ message: "Internal server error." });
+	}
 })
 
 app.get("/", (req, res) => {

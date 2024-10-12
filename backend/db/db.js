@@ -44,20 +44,14 @@ class LogService {
 
 			const newSolution = new SolutionLog({uniqueId, description: solution.description, commands: solution.commands});
 			await newSolution.save();
-		
-			// console.log(
-			// 	`[mongodb] new error log inserted with uniqueId: ${newSolution.uniqueId}`
-			// );
 			
 			const groupId = solution.groupId;
 
 			const updatedGroup = await GroupLog.findByIdAndUpdate(
 				groupId,
-				{ $set: { solution: newSolution.uniqueId } },  // Update the solution field with the solution ID
-				{ new: true }  // Option to return the updated document
+				{ $set: { solution: newSolution.uniqueId } },
+				{ new: true } 
 			);
-
-
 		} catch (error) {
 			console.error("[mongodb] error writing to MongoDB:", error);
 		}
