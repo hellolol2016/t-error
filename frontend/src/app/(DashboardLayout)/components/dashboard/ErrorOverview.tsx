@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useTheme } from "@mui/material/styles";
 import DashboardCard from "@/app/(DashboardLayout)/components/shared/DashboardCard";
 import { errorData } from "@/app/(DashboardLayout)/page";
 import { BarChart } from "@mui/x-charts";
 import { Box, Grid } from "@mui/material";
+import { ErrorContext } from "../../context/ErrorContext";
 
 function groupErrorByHour(errorData: any) {
   const now = new Date();
@@ -40,6 +41,7 @@ function formatDate(date: string) {
 
 const ErrorOverview = () => {
   const [groupedData, setGroupedData] = useState<Record<string, number>>({});
+  const errorData = useContext(ErrorContext) ?? [];
 
   useEffect(() => {
     const grouped = groupErrorByHour(errorData);
