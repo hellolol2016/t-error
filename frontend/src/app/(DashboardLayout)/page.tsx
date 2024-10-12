@@ -57,6 +57,16 @@ export const errorData = [
     timestamp: "2024-10-12T05:06:07.008Z",
     __v: 0,
   },
+  {
+    _id: "677a00b8f1b248135350a03c",
+    uniqueId: "6",
+    errorData: {
+      command: "git jull",
+      error: "test other message",
+    },
+    timestamp: "2024-10-12T04:53:12.628Z",
+    v: 0,
+  },
 ];
 
 const Dashboard = () => {

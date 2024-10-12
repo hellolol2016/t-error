@@ -94,7 +94,13 @@ const products = [
 const FrequentErrors = () => {
   return (
     <DashboardCard title="Frequent Errors">
-      <Box sx={{ overflow: "auto", width: { xs: "280px", sm: "auto" } }}>
+      <Box
+        sx={{
+          overflow: "auto",
+          height: "24vh",
+          width: { xs: "280px", sm: "auto" },
+        }}
+      >
         <Table
           aria-label="simple table"
           sx={{

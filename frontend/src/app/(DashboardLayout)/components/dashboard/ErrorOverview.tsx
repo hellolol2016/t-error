@@ -55,8 +55,8 @@ const ErrorOverview = () => {
         sx={{
           width: "100%",
           margin: "0 auto", // Center the box horizontally
+          height: "24vh",
         }}
-        height={300}
       >
         <BarChart
           xAxis={[{ scaleType: "band", data: xAxisData }]}
