@@ -52,7 +52,7 @@ const RecentErrors = () => {
           onResizeCapture={undefined}
           sx={{
             p: 0,
-            mb: "-40px",
+            mb: "-10px",
             "& .MuiTimelineConnector-root": {
               width: "1px",
               backgroundColor: "#efefef",
@@ -72,7 +72,11 @@ const RecentErrors = () => {
                 <TimelineSeparator>
                   <TimelineDot color="error" variant="outlined" />
                 </TimelineSeparator>
-                <TimelineContent>{error.errorData.error}</TimelineContent>
+                <TimelineContent>
+                  {error.errorData.command}
+                  <br></br>
+                  {error.errorData.error}
+                </TimelineContent>
               </TimelineItem>
             );
           })}

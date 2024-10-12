@@ -67,7 +67,7 @@ const Dashboard = () => {
       <Box>
         <Grid container spacing={3}>
           <Grid item xs={12} lg={8}>
-            <SalesOverview />
+            <RecentErrors />
           </Grid>
           <Grid item xs={12} lg={4}>
             <Grid container spacing={3}>
@@ -80,7 +80,7 @@ const Dashboard = () => {
             </Grid>
           </Grid>
           <Grid item xs={12} lg={4}>
-            <RecentErrors />
+            <SalesOverview />
           </Grid>
           <Grid item xs={12} lg={8}>
             <FrequentErrors />
