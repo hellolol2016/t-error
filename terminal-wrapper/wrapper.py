@@ -31,8 +31,8 @@ def run_command(command):
         return True
     else:
         json_object = {
-            "uniqueId": 90,
             "username": os.getenv("USER"),
+            "uniqueId": str(uuid.uuid4()),
             "errorData": { "command": command, "error": stderr }
         }
         requests.post(url=api_url, json=json_object)
