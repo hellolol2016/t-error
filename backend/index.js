@@ -5,6 +5,8 @@ import mongoose from "mongoose";
 import MongoDBService from "./db/connection.js";
 import LogService from "./db/db.js";
 import ErrorGrouping from "./group_logs.js";
+import GroupLog from "./db/groupSchema.js";
+import { v4 as uuidv4 } from 'uuid';
 
 const COLLECTION_NAME = "errorLogs";
 const SIMILARITY_THRESHOLD = 0.8;
@@ -24,30 +26,49 @@ app.use(bodyParser.json());
 
 // Route to receive error data
 app.post("/errors", async (req, res) => {
-  try {
-    const { uniqueId, username, errorData } = req.body;
+	try {
+		const { uniqueId, username, errorData } = req.body;
 
-    // Validate input
-    if (!uniqueId || !errorData) {
-      return res
-        .status(400)
-        .json({ message: "uniqueId and errorData are required." });
-    }
+		// Validate input
+		if (!uniqueId || !errorData) {
+			return res
+				.status(400)
+				.json({ message: "uniqueId and errorData are required." });
+		}
 
-    logService.writeErrorLog({ uniqueId, username, errorData });
+		logService.writeErrorLog({ uniqueId, username, errorData });
 
-    console.log("Received and saved error data:", errorData);
-    res.status(201).json({ message: "Error data received and saved.", id: 0 });
-  } catch (error) {
-    if (error.code === 11000) {
-      // Duplicate uniqueId error
-      res.status(409).json({ message: "uniqueId already exists." });
-    } else {
-      console.error("Error saving data:", error);
-      res.status(500).json({ message: "Internal server error." });
-    }
-  }
+		console.log("Received and saved error data:", errorData);
+		res.status(201).json({ message: "Error data received and saved.", id: 0 });
+	} catch (error) {
+		if (error.code === 11000) {
+		// Duplicate uniqueId error
+			res.status(409).json({ message: "uniqueId already exists." });
+		} else {
+			console.error("Error saving data:", error);
+			res.status(500).json({ message: "Internal server error." });
+		}
+	}
 });
+
+app.post("/writeSolution", async (req, res) => {
+	try {
+		const { groupId, description, commands } = req.body;
+
+		const solution = await logService.writeSolution({ groupId, description, commands } );
+
+		console.log("Received and saved error data:", solution);
+		res.status(201).json({ message: "Error data received and saved.", id: 0 });
+	} catch (error) {
+		if (error.code === 11000) {
+		// Duplicate uniqueId error
+			res.status(409).json({ message: "uniqueId already exists." });
+		} else {
+			console.error("Error saving data:", error);
+			res.status(500).json({ message: "Internal server error." });
+		}
+	}
+})
 
 // Route to retrieve error data by uniqueId
 app.get("/errors", async (req, res) => {
@@ -67,8 +88,7 @@ app.get("/errors", async (req, res) => {
 
 app.get("/getErrorGroups", async (req, res) => {
   try {
-    const logs = await logService.readErrorLogs({});
-    const groups = errorGrouping.groupLogs(logs);
+    const groups = await logService.readGroupLogs();
 
     res.status(200).json(groups);
   } catch (error) {
@@ -76,6 +96,8 @@ app.get("/getErrorGroups", async (req, res) => {
     res.status(500).json({ message: "Internal server error." });
   }
 });
+
+
 
 // Basic route to test server
 app.get("/", (req, res) => {

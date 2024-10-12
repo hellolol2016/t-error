@@ -1,4 +1,5 @@
 import { stringSimilarity } from "string-similarity-js";
+import GroupLog from "./db/groupSchema.js";
 
 export default class ErrorGrouping {
     constructor(similarityThreshold) {
@@ -65,5 +66,41 @@ export default class ErrorGrouping {
         this.groups = [];
 
         return answer;
+    }
+
+    async matchAndStoreSingleLog(log) {
+        const command = log.errorData.command;
+        const error = log.errorData.error;
+
+        if (!command || !error) {
+            throw new Error("Command and error fields are required.");
+        }
+
+        const existingGroups = await GroupLog.find({});
+
+        let foundGroup = false;
+
+        for (let group of existingGroups) {
+            const combinedError = `command: ${group.representative.command} - error: ${group.representative.error}`;
+            const currentError = `command: ${command} - error: ${error}`;
+            const similarity = stringSimilarity(currentError, combinedError);
+
+            if (similarity >= this.similarityThreshold) {
+                group.errors.push({ command, error });
+                group.count += 1;
+                await group.save();
+                foundGroup = true;
+                break;
+            }
+        }
+
+        if (!foundGroup) {
+            const newGroup = new GroupLog({
+                representative: { command, error },
+                errors: [{ command, error }],
+                count: 1  
+            });
+            await newGroup.save(); 
+        }
     }
 }

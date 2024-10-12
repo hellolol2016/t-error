@@ -1,6 +1,7 @@
 import MongoDBService from './db/connection.js'; 
 import LogService from './db/db.js';
 import ErrorGrouping from './group_logs.js'
+import GroupLog from "./db/groupSchema.js";
 
 async function performDatabaseOperations() {
 	try {
@@ -13,9 +14,16 @@ async function performDatabaseOperations() {
 
         const errorGrouping = new ErrorGrouping(0.8);
 
-		const groups = errorGrouping.groupLogs(logs);
+        // for (const log of logs) {
+        //     await errorGrouping.matchAndStoreSingleLog(log);
+        // }
 
-        console.log(groups);
+		// const groups = errorGrouping.groupLogs(logs);
+
+        // console.log(groups);
+
+        const t = await GroupLog.find({});
+        console.log(t);
 
 		await mongoService.close();
 	} catch (error) {
