@@ -1,11 +1,6 @@
-import express from 'express';    
 import MongoDBService from './db/connection.js'; 
-import LogService from './services/LogService.js';
-
-const app = express();
-const port = process.env.PORT || 3000;
-
-app.use(express.json());
+import LogService from './db/db.js';
+import ErrorGrouping from './group_logs.js'
 
 async function performDatabaseOperations() {
 	try {
@@ -14,15 +9,13 @@ async function performDatabaseOperations() {
 		
 		const logService = new LogService();
 		
-		const test_log_1 = {
-			uniqueId: "1",
-			errorData: { command: "git pull", error: "error message" }
-		};
-
-		await logService.writeErrorLog(test_log_1);
-
 		const logs = await logService.readErrorLogs();
-		console.log(logs);
+
+        const errorGrouping = new ErrorGrouping(0.8);
+
+		const groups = errorGrouping.groupLogs(logs);
+
+        console.log(groups);
 
 		await mongoService.close();
 	} catch (error) {
@@ -31,7 +24,3 @@ async function performDatabaseOperations() {
 }
 
 performDatabaseOperations();
-
-app.listen(port, () => {
-	console.log(`Server running on port ${port}`);
-});

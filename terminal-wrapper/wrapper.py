@@ -31,6 +31,7 @@ def run_command(command):
         return True
     else:
         json_object = {
+            "username": os.getenv("USER"),
             "uniqueId": str(uuid.uuid4()),
             "errorData": { "command": command, "error": stderr }
         }
