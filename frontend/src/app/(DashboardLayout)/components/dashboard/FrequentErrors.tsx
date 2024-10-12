@@ -54,11 +54,17 @@ const FrequentErrors = () => {
         }}
       >
         <Table
-          aria-label="simple table"
-          sx={{
-            whiteSpace: "nowrap",
-            mt: 2,
-          }}
+            aria-label="simple table"
+            sx={{
+              whiteSpace: "nowrap",
+              mt: 2,
+              '& tbody tr': {
+                transition: 'background-color 0.3s',
+              },
+              '& tbody tr:hover': {
+                backgroundColor: 'rgba(50, 50, 50, 0.1)',
+              },
+            }}
         >
           <TableHead>
             <TableRow>
