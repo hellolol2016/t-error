@@ -7,7 +7,7 @@ from datetime import datetime
 import json
 import requests
 
-api_url = "http://localhost:3000/api/newError" 
+api_url = "http://localhost:3000/errors" 
 
 def create_user_id():
     if not os.path.isfile('user_id.txt'):
@@ -31,10 +31,8 @@ def run_command(command):
         return True
     else:
         json_object = {
-            "user_id": user_id,
-            "timestamp": timestamp.strftime("%Y-%m-%d %H:%M:%S"),
-            "command": command,
-            "stderr": stderr,
+            "uniqueId": 5,
+            "errorData": { "command": command, "error": stderr }
         }
         requests.post(url=api_url, json=json_object)
         print("An error occurred while executing the command at",timestamp,". Everyone laugh at user " + user_id)

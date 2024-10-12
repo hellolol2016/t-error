@@ -4,6 +4,7 @@ const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 import { useTheme } from '@mui/material/styles';
 import { Grid, Stack, Typography, Avatar } from '@mui/material';
 import { IconArrowUpLeft } from '@tabler/icons-react';
+import {errorData} from '@/app/(DashboardLayout)/page';
 
 import DashboardCard from '@/app/(DashboardLayout)/components/shared/DashboardCard';
 
@@ -60,10 +61,15 @@ const YearlyBreakup = () => {
       },
     ],
   };
-  const seriescolumnchart: any = [38, 40, 25];
+  const seriescolumnchart: any = 
+  //do weekly data
+    [
+        25, 15, 10
+    ]
+  ;
 
   return (
-    <DashboardCard title="Yearly Breakup">
+    <DashboardCard title="Weekly breakup">
       <Grid container spacing={3}>
         {/* column */}
         <Grid item xs={7} sm={7}>
@@ -87,7 +93,7 @@ const YearlyBreakup = () => {
                 sx={{ width: 9, height: 9, bgcolor: primary, svg: { display: 'none' } }}
               ></Avatar>
               <Typography variant="subtitle2" color="textSecondary">
-                2022
+                10/12
               </Typography>
             </Stack>
             <Stack direction="row" spacing={1} alignItems="center">
@@ -95,7 +101,7 @@ const YearlyBreakup = () => {
                 sx={{ width: 9, height: 9, bgcolor: primarylight, svg: { display: 'none' } }}
               ></Avatar>
               <Typography variant="subtitle2" color="textSecondary">
-                2023
+                10/07
               </Typography>
             </Stack>
           </Stack>
