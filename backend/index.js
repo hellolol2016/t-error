@@ -1,29 +1,23 @@
-const express = require('express');
-const cors = require('cors');
-const bodyParser = require('body-parser');
-const mongoose = require('mongoose');
+import express from 'express';
+import cors from 'cors';
+import bodyParser from 'body-parser';
+import mongoose from 'mongoose';
+import MongoDBService from './db/connection.js';
+import LogService from './db/db.js';
+
+
+const COLLECTION_NAME = "errorLogs";
 
 const app = express();
 const port = 3000;
 
+const mongodbService = new MongoDBService();
+await mongodbService.connect();
+const logService = new LogService();
+
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
-
-// Connect to MongoDB
-mongoose.connect('mongodb://localhost:27017/errorDB', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
-
-// Define a schema and model
-const errorSchema = new mongoose.Schema({
-  uniqueId: { type: String, required: true, unique: true },
-  errorData: mongoose.Schema.Types.Mixed,
-  timestamp: { type: Date, default: Date.now },
-});
-
-const ErrorLog = mongoose.model('ErrorLog', errorSchema);
 
 // Route to receive error data
 app.post('/errors', async (req, res) => {
@@ -35,12 +29,10 @@ app.post('/errors', async (req, res) => {
       return res.status(400).json({ message: 'uniqueId and errorData are required.' });
     }
 
-    // Create a new error log entry
-    const errorLog = new ErrorLog({ uniqueId, errorData });
-    await errorLog.save();
+    logService.writeErrorLog({ uniqueId, errorData });
 
     console.log('Received and saved error data:', errorData);
-    res.status(201).json({ message: 'Error data received and saved.', id: errorLog._id });
+    res.status(201).json({ message: 'Error data received and saved.', id: 0 });
   } catch (error) {
     if (error.code === 11000) {
       // Duplicate uniqueId error
@@ -57,7 +49,7 @@ app.get('/errors/:uniqueId', async (req, res) => {
   try {
     const { uniqueId } = req.params;
 
-    const errorLog = await ErrorLog.findOne({ uniqueId });
+    const errorLog = await logService.readErrorLogs({});
 
     if (!errorLog) {
       return res.status(404).json({ message: 'Error data not found.' });
