@@ -24,7 +24,6 @@ export default class ErrorGrouping {
         this.logs.forEach(log => {  
             const command = this.preprocessText(log.errorData.command);
             const error = this.preprocessText(log.errorData.error);
-            // Push an object containing separate command and error fields
             this.errors.push({ command, error });
         });
     }
@@ -47,7 +46,6 @@ export default class ErrorGrouping {
                 }
             }
             if (!foundGroup) {
-                // When creating a new group, include command and error in a structured format
                 this.groups.push({
                     representative: { command, error },
                     errors: [{ command, error }],
@@ -56,11 +54,16 @@ export default class ErrorGrouping {
             }
         });
 
-        // Format output for the frontend as JSON structure
-        return this.groups.map(group => ({
+        const answer = this.groups.map(group => ({
             representative: group.representative,
             count: group.count,
             errors: group.errors
         }));
+
+        this.logs = [];
+        this.errors = [];
+        this.groups = [];
+
+        return answer;
     }
 }
