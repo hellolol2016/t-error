@@ -25,6 +25,7 @@ app.use(bodyParser.json());
 // Route to receive error data
 app.post("/errors", async (req, res) => {
   try {
+    console.log(req.body);
     const { uniqueId, username, errorData } = req.body;
 
     // Validate input
