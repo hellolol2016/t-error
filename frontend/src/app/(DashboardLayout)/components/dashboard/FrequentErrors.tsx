@@ -33,9 +33,13 @@ const FrequentErrors: React.FC = () => {
   useEffect(() => {
     // Fetch the error data from your API or use the provided data
     const fetchData = async () => {
-      const response = await fetch("http://localhost:3001/getErrorGroups");
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/getErrorGroups`
+      );
       const data = await response.json();
-      const sortedData = data.sort((a:ErrorGroup, b:ErrorGroup) => b.count - a.count);
+      const sortedData = data.sort(
+        (a: ErrorGroup, b: ErrorGroup) => b.count - a.count
+      );
       setErrorData(data);
     };
 
