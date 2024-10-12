@@ -1,18 +1,9 @@
-import DashboardCard from "@/app/(DashboardLayout)/components/shared/DashboardCard";
-import {
-  Timeline,
-  TimelineItem,
-  TimelineOppositeContent,
-  TimelineSeparator,
-  TimelineDot,
-  TimelineConnector,
-  TimelineContent,
-  timelineOppositeContentClasses,
-} from "@mui/lab";
-import { Link, Typography } from "@mui/material";
-import { errorData } from "../../page";
+import { ChevronRight, Search } from "lucide-react";
+import "./RecentErrors.css";
+import React, { useContext, useState } from "react";
+import { ErrorContext } from "../../context/ErrorContext";
 
-function formatTimestamp(timestamp: string) {
+function formatTimestamp(timestamp: string, username: string) {
   const date = new Date(timestamp);
   const now = new Date();
   const yesterday = new Date(now);
@@ -30,59 +21,83 @@ function formatTimestamp(timestamp: string) {
     .toLowerCase();
 
   if (isToday) {
-    return `Today at ${formattedTime}`;
+    return `${username ? username : "unknown user"} Today at ${formattedTime}`;
   } else if (isYesterday) {
-    return `Yesterday at ${formattedTime}`;
+    return `${
+      username ? username : "unknown user"
+    } Yesterday at ${formattedTime}`;
   } else {
-    return (
-      date.toLocaleDateString("en-US", { month: "long", day: "numeric" }) +
-      ` , ${formattedTime}`
-    );
+    return username
+      ? username
+      : "unknown user" +
+          " " +
+          date.toLocaleDateString("en-US", { month: "long", day: "numeric" }) +
+          `, ${formattedTime}`;
   }
 }
 
 const RecentErrors = () => {
+  const errorData = useContext(ErrorContext) ?? [];
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [searchResults, setSearchResults] = useState<typeof errorData>([]);
+
+  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const term = event.target.value;
+    setSearchTerm(term);
+
+    // Simulated search results
+    if (term) {
+      setSearchResults(
+        errorData.filter((error) =>
+          error.username?.toLowerCase().includes(term.toLowerCase())
+        )
+      );
+    } else {
+      setSearchResults([]);
+    }
+  };
+
   return (
-    <DashboardCard title="Recent Error Logs">
-      <>
-        <Timeline
-          className="theme-timeline"
-          nonce={undefined}
-          onResize={undefined}
-          onResizeCapture={undefined}
-          sx={{
-            p: 0,
-            mb: "-10px",
-            "& .MuiTimelineConnector-root": {
-              width: "1px",
-              backgroundColor: "#efefef",
-            },
-            [`& .${timelineOppositeContentClasses.root}`]: {
-              flex: 0.5,
-              paddingLeft: 0,
-            },
-          }}
-        >
-          {errorData.map((error, index) => {
-            return (
-              <TimelineItem key={index} style={{ "padding-bottom": "3px" }}>
-                <TimelineOppositeContent width={10}>
-                  {formatTimestamp(error.timestamp)}
-                </TimelineOppositeContent>
-                <TimelineSeparator>
-                  <TimelineDot color="error" variant="outlined" />
-                </TimelineSeparator>
-                <TimelineContent>
-                  {error.errorData.command}
-                  <br></br>
-                  {error.errorData.error}
-                </TimelineContent>
-              </TimelineItem>
-            );
-          })}
-        </Timeline>
-      </>
-    </DashboardCard>
+    <div className="terminal-container">
+      <div className="terminal-header">
+        <div className="terminal-button terminal-button-red"></div>
+        <div className="terminal-button terminal-button-yellow"></div>
+        <div className="terminal-button terminal-button-green"></div>
+        <span className="terminal-title">Terminal - Error Logs</span>
+      </div>
+
+      <div className="search-container">
+        <Search size={16} className="search-icon" />
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={handleSearch}
+          placeholder="Search users..."
+          className="search-input"
+        />
+      </div>
+
+      <div className="terminal-content">
+        {(searchResults.length > 0 ? searchResults : errorData).map(
+          (error, index) => (
+            <div key={index} className="terminal-item">
+              <div className="terminal-item-header">
+                <ChevronRight className="chevron-icon" size={16} />
+                <span className="terminal-timestamp">
+                  {formatTimestamp(error.timestamp, error.username)}
+                </span>
+              </div>
+              <div className="terminal-command">
+                $ {error.errorData.command}
+              </div>
+              <div className="terminal-error">
+                Error: {error.errorData.error}
+              </div>
+            </div>
+          )
+        )}
+      </div>
+    </div>
   );
 };
 

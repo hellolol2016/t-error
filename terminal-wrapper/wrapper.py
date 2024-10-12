@@ -31,10 +31,9 @@ def run_command(command):
         return True
     else:
         json_object = {
-            "uniqueId": "",
-            "errorData": { "command": "", "error": "" },
-            "timestamp": "",
-            "username": ""
+            "username": os.getenv("USER"),
+            "uniqueId": str(uuid.uuid4()),
+            "errorData": { "command": command, "error": stderr }
         }
         requests.post(url=api_url, json=json_object)
         print("An error occurred while executing the command at",timestamp,". Everyone laugh at user " + user_id)
