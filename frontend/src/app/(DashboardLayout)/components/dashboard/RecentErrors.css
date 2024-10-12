@@ -1,0 +1,126 @@
+﻿.terminal-container {
+    background-color: black;
+    color: #10b981;
+    padding: 16px;
+    font-family: monospace;
+    border-radius: 8px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.terminal-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.terminal-button {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+.terminal-button-red {
+    background-color: #ef4444;
+}
+
+.terminal-button-yellow {
+    background-color: #f59e0b;
+}
+
+.terminal-button-green {
+    background-color: #10b981;
+}
+
+.terminal-title {
+    margin-left: 16px;
+    color: white;
+}
+
+.terminal-content {
+    overflow-y: auto;
+    max-height: 320px;
+}
+
+.terminal-item {
+    padding: 8px;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.terminal-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.terminal-item-header {
+    display: flex;
+    align-items: center;
+}
+
+.terminal-timestamp {
+    color: #f59e0b;
+}
+
+.terminal-command {
+    color: #60a5fa;
+    margin-left: 24px;
+    margin-top: 4px;
+}
+
+.terminal-error {
+    color: #ef4444;
+    margin-left: 24px;
+    margin-top: 4px;
+}
+
+.chevron-icon {
+    margin-right: 8px;
+}
+
+.search-container {
+    margin-bottom: 16px;
+}
+
+.search-input {
+    background-color: #1e1e1e;
+    border: 1px solid #333;
+    color: #10b981;
+    padding: 8px;
+    width: 100%;
+    font-family: monospace;
+}
+
+.search-results {
+    margin-top: 8px;
+}
+
+.search-result {
+    padding: 4px 0;
+}
+
+.search-result:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+/* Scrollbar styles for WebKit-based browsers (Chrome, Safari, Edge) */
+.terminal-content::-webkit-scrollbar {
+    width: 5px;  
+}
+
+.terminal-content::-webkit-scrollbar-track {
+    background: #f1f1f1;  
+}
+
+.terminal-content::-webkit-scrollbar-thumb {
+    background-color: #10b981;  
+    border-radius: 5px;     
+}
+
+.terminal-content::-webkit-scrollbar-thumb:hover {
+    background-color: #10b981;  
+}
+
+/* Scrollbar styles for Firefox */
+.terminal-content {
+    scrollbar-width: thin;  
+    scrollbar-color: rgba(0, 255, 0, 0.25) black;
+}

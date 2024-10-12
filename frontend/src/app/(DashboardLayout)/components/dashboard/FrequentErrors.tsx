@@ -15,7 +15,7 @@ interface ErrorItem {
   errorData: { command: any; error: any };
 }
 
-function compileData(errorData: ErrorItem[]) {
+export function compileData(errorData: ErrorItem[]) {
   // Define priority mapping
   const priorityMapping: { [key: string]: string } = {
     "git pull": "Low",
@@ -94,7 +94,13 @@ const products = [
 const FrequentErrors = () => {
   return (
     <DashboardCard title="Frequent Errors">
-      <Box sx={{ overflow: "auto", width: { xs: "280px", sm: "auto" } }}>
+      <Box
+        sx={{
+          overflow: "auto",
+          height: "24vh",
+          width: { xs: "280px", sm: "auto" },
+        }}
+      >
         <Table
           aria-label="simple table"
           sx={{

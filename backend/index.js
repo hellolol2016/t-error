@@ -10,7 +10,7 @@ const COLLECTION_NAME = "errorLogs";
 const SIMILARITY_THRESHOLD = 0.8;
 
 const app = express();
-const port = 3000;
+const port = 3001;
 
 const mongodbService = new MongoDBService();
 await mongodbService.connect();
