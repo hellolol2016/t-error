@@ -46,7 +46,7 @@ const ErrorOverview = () => {
   useEffect(() => {
     const grouped = groupErrorByHour(errorData);
     setGroupedData(grouped);
-  }, []);
+  }, [errorData]);
 
   const xAxisData = Object.keys(groupedData);
   const seriesData = Object.values(groupedData);

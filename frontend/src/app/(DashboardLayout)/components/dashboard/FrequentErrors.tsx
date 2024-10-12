@@ -17,22 +17,16 @@ interface ErrorItem {
 }
 
 export function compileData(errorData: ErrorItem[]) {
-  // Define priority mapping
-  const priorityMapping: { [key: string]: string } = {
-    "git pull": "Low",
-    poop: "High",
-  };
   // Use a Map to group and count errors by command
   const errorMap = new Map();
 
   errorData.forEach((item) => {
     const { command, error } = item.errorData;
-    const priority = priorityMapping[command] || "Medium"; // Default to 'medium' if not specified
 
     if (errorMap.has(command)) {
       errorMap.get(command).count++;
     } else {
-      errorMap.set(command, { error, priority, count: 1 });
+      errorMap.set(command, { error, count: 1 });
     }
   });
 
@@ -40,13 +34,6 @@ export function compileData(errorData: ErrorItem[]) {
   const compiledData = Array.from(errorMap, ([command, data]) => ({
     command,
     error: data.error,
-    priority: data.priority,
-    pbg:
-      data.priority === "Low"
-        ? "primary.main"
-        : data.priority === "Mediumm"
-        ? "secondary.main"
-        : "error.main",
     count: data.count,
   }));
 
@@ -55,6 +42,8 @@ export function compileData(errorData: ErrorItem[]) {
 
 const FrequentErrors = () => {
   const errorData = useContext(ErrorContext) ?? [];
+  const compiledData = compileData(errorData);
+  compiledData.sort((a, b) => b.count - a.count);
   return (
     <DashboardCard title="Frequent Errors">
       <Box
@@ -83,11 +72,6 @@ const FrequentErrors = () => {
                   Error
                 </Typography>
               </TableCell>
-              <TableCell>
-                <Typography variant="subtitle2" fontWeight={600}>
-                  Priority
-                </Typography>
-              </TableCell>
               <TableCell align="right">
                 <Typography variant="subtitle2" fontWeight={600}>
                   Count
@@ -96,7 +80,7 @@ const FrequentErrors = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {compileData(errorData).map((error, index) => (
+            {compiledData.map((error, index) => (
               <TableRow key={index}>
                 <TableCell>
                   <Box
@@ -128,17 +112,6 @@ const FrequentErrors = () => {
                   >
                     {error.command}
                   </Typography>
-                </TableCell>
-                <TableCell>
-                  <Chip
-                    sx={{
-                      px: "3px",
-                      backgroundColor: error.pbg,
-                      color: "#fff",
-                    }}
-                    size="small"
-                    label={error.priority}
-                  ></Chip>
                 </TableCell>
                 <TableCell align="right">
                   <Typography variant="h5">{error.count}</Typography>

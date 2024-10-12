@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect, ReactNode } from "react";
 
 interface Error {
+  username: any;
   timestamp: string;
   errorData: {
     command: string;
