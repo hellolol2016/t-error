@@ -73,7 +73,7 @@ app.post("/writeSolution", async (req, res) => {
 		res.status(201).json({ message: "Error data received and saved.", id: 0 });
 	} catch (error) {
 		if (error.code === 11000) {
-			res.status(409).json({ message: "uniqueId already exists." });
+			res.status(409).json({ message: "uniqueId already exists.", error });
 		} else {
 			console.error("Error saving data:", error);
 			res.status(500).json({ message: "Internal server error." });

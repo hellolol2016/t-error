@@ -18,6 +18,7 @@ interface ErrorGroup {
     error: string;
   };
   count: number;
+  _id: number;
   errors: {
     command: string;
     error: string;
@@ -34,6 +35,7 @@ const FrequentErrors: React.FC = () => {
     const fetchData = async () => {
       const response = await fetch("http://localhost:3001/getErrorGroups");
       const data = await response.json();
+      const sortedData = data.sort((a:ErrorGroup, b:ErrorGroup) => b.count - a.count);
       setErrorData(data);
     };
 
@@ -63,11 +65,6 @@ const FrequentErrors: React.FC = () => {
               </Typography>
             </Box>
           </Box>
-        </TableCell>
-        <TableCell>
-          <Typography variant="subtitle1" fontWeight={600}>
-            {group.representative.error}
-          </Typography>
         </TableCell>
         <TableCell align="right">
           <Typography variant="subtitle1" fontWeight={600}>
@@ -123,11 +120,6 @@ const FrequentErrors: React.FC = () => {
                 <TableCell>
                   <Typography variant="subtitle2" fontWeight={600}>
                     Command
-                  </Typography>
-                </TableCell>
-                <TableCell>
-                  <Typography variant="subtitle2" fontWeight={600}>
-                    Error
                   </Typography>
                 </TableCell>
                 <TableCell align="right">

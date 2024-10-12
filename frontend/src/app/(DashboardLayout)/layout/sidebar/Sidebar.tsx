@@ -1,6 +1,8 @@
 import { useMediaQuery, Box, Drawer } from "@mui/material";
 import SidebarItems from "./SidebarItems";
-import { Sidebar, Logo } from 'react-mui-sidebar';
+import { Sidebar } from 'react-mui-sidebar';
+import Image from "next/image";
+import Icon from "./logo.png";
 
 interface ItemType {
     isMobileSidebarOpen: boolean;
@@ -61,7 +63,14 @@ const MSidebar = ({
                             showProfile={false}
                         />
                         <Box>
-                            <Logo img="/images/logos/dark-logo.svg" />
+                            <Image
+                                src={Icon}
+                                alt="logo"
+                                height={70}
+                                width={70}
+                                priority
+                                style={{ marginLeft: '36px', marginTop: '10px' }}
+                            />
                             <SidebarItems />
                         </Box>
                     </Box>
@@ -87,7 +96,7 @@ const MSidebar = ({
                 <Sidebar
                     width={'270px'}
                     collapsewidth="80px"
-                    open={isMobileSidebarOpen} 
+                    open={isMobileSidebarOpen}
                     isCollapse={false}
                     mode="light"
                     direction="ltr"
@@ -96,7 +105,7 @@ const MSidebar = ({
                     showProfile={false}
                 />
                 <Box>
-                    <Logo img="/images/logos/dark-logo.svg" />
+                    <Image src={Icon} alt="logo" height={70} width={74} priority style={{ marginLeft: '36px', marginTop: '10px' }} />
                     <SidebarItems />
                 </Box>
             </Box>

@@ -8,17 +8,24 @@ interface MarkDownPopupProps {
 
 const handleSubmitMarkdown = async (
   markdown: string,
-  errorID: number,
+  errorID: string,
   commands: string[]
 ) => {
-  const res = await fetch("http://localhost:3001/solutions", {
+  console.log(
+    JSON.stringify({
+      groupId: errorID,
+      description: markdown,
+      commands: commands,
+    })
+  );
+  const res = await fetch("http://localhost:3001/writeSolution", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      errorID: errorID,
-      markdown: markdown,
+      groupId: errorID,
+      description: markdown,
       commands: commands,
     }),
   });
@@ -49,14 +56,27 @@ const MarkDownPopup: React.FC<MarkDownPopupProps> = ({ errorData }) => {
         p: 2,
       }}
     >
-      <Typography variant="h6" component="h2">
+      <Typography
+        variant="h6"
+        component="h2"
+        sx={{ mb: 2, fontWeight: "bold" }}
+      >
         Error Details
       </Typography>
-      <Typography sx={{ mt: 2 }}>
-        Command: {errorData.representative.command}
+      <Typography sx={{ mb: 1.5, fontSize: "1rem" }}>
+        <strong>Command:</strong>{" "}
+        <Typography component="span" sx={{ color: "blue" }}>
+          {errorData.representative.command}
+        </Typography>
       </Typography>
-      <Typography sx={{ mt: 2 }}>
-        Error: {errorData.representative.error}
+      <Typography sx={{ mb: 1.5, fontSize: "1rem" }}>
+        <strong>Error:</strong>{" "}
+        <Typography component="span" sx={{ color: "red" }}>
+          {errorData.representative.error}
+        </Typography>
+      </Typography>
+      <Typography sx={{ mb: 1.5, fontSize: "1rem" }}>
+        <strong>ID:</strong> {errorData._id}
       </Typography>
       <MarkdownEditor
         height="400px"
@@ -68,7 +88,7 @@ const MarkDownPopup: React.FC<MarkDownPopupProps> = ({ errorData }) => {
         sx={{ mt: 2 }}
         onClick={() => {
           console.log(markdown);
-          handleSubmitMarkdown(markdown, errorData.id, getCommands(markdown));
+          handleSubmitMarkdown(markdown, errorData._id, getCommands(markdown));
         }}
       >
         Submit Solution

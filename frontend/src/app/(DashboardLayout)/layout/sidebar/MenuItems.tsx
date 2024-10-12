@@ -18,7 +18,7 @@ const Menuitems = [
 
   {
     id: uniqueId(),
-    title: "Dashboard",
+    title: "t-Error Dashboard",
     icon: IconLayoutDashboard,
     href: "/",
   },
@@ -37,7 +37,13 @@ const Menuitems = [
     title: "Register",
     icon: IconUserPlus,
     href: "/authentication/register",
-  }
+  },
+  {
+    id: uniqueId(),
+    title: "Markdown Renderer",
+    icon:IconMoodHappy ,
+    href: "/markdown/render",
+  },
 ];
 
 export default Menuitems;
