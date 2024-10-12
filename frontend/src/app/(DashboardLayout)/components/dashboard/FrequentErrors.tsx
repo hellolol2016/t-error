@@ -1,178 +1,151 @@
+import React, { useState, useEffect } from "react";
 import {
-  Typography,
-  Box,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableRow,
-  Chip,
+  Typography,
+  Box,
+  Modal,
 } from "@mui/material";
-import DashboardCard from "@/app/(DashboardLayout)//components/shared/DashboardCard";
-import { useContext } from "react";
-import { ErrorContext } from "../../context/ErrorContext";
+import DashboardCard from "../shared/DashboardCard";
+import MarkDownPopup from "../forms/MarkDownPopup";
 
-interface ErrorItem {
-  errorData: { command: any; error: any };
+interface ErrorGroup {
+  representative: {
+    command: string;
+    error: string;
+  };
+  count: number;
+  errors: {
+    command: string;
+    error: string;
+  }[];
 }
 
-export function compileData(errorData: ErrorItem[]) {
-  // Use a Map to group and count errors by command
-  const errorMap = new Map();
+const FrequentErrors: React.FC = () => {
+  const [errorData, setErrorData] = useState<ErrorGroup[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedError, setSelectedError] = useState<ErrorGroup | null>(null);
 
-  errorData.forEach((item) => {
-    const { command, error } = item.errorData;
+  useEffect(() => {
+    // Fetch the error data from your API or use the provided data
+    const fetchData = async () => {
+      const response = await fetch("http://localhost:3001/getErrorGroups");
+      const data = await response.json();
+      setErrorData(data);
+    };
 
-    if (errorMap.has(command)) {
-      errorMap.get(command).count++;
-    } else {
-      errorMap.set(command, { error, count: 1 });
-    }
-  });
+    fetchData();
+  }, []);
+  const handleRowClick = (errorGroup: ErrorGroup) => {
+    setSelectedError(errorGroup);
+    setIsModalOpen(true);
+  };
 
-  // Convert Map to array of objects
-  const compiledData = Array.from(errorMap, ([command, data]) => ({
-    command,
-    error: data.error,
-    count: data.count,
-  }));
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedError(null);
+  };
 
-  return compiledData;
-}
+  const parseErrorResponse = (data: ErrorGroup[]) => {
+    return data.map((group, index) => (
+      <TableRow key={index} onClick={() => handleRowClick(group)}>
+        <TableCell>
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <Box>
+              <Typography variant="subtitle1" fontWeight={600}>
+                {group.representative.command}
+              </Typography>
+              <Typography color="textSecondary" sx={{ fontSize: "12px" }}>
+                {group.representative.error}
+              </Typography>
+            </Box>
+          </Box>
+        </TableCell>
+        <TableCell>
+          <Typography variant="subtitle1" fontWeight={600}>
+            {group.representative.error}
+          </Typography>
+        </TableCell>
+        <TableCell align="right">
+          <Typography variant="subtitle1" fontWeight={600}>
+            {group.count}
+          </Typography>
+        </TableCell>
+      </TableRow>
+    ));
+  };
 
-const FrequentErrors = () => {
-  const errorData = useContext(ErrorContext) ?? [];
-  const compiledData = compileData(errorData);
-  compiledData.sort((a, b) => b.count - a.count);
   return (
     <DashboardCard title="Frequent Errors">
-      <Box
-        sx={{
-          overflow: "auto",
-          height: "24vh",
-          width: { xs: "280px", sm: "auto" },
-        }}
-      >
-        <Table
-          aria-label="simple table"
+      <>
+        <Box
           sx={{
-            whiteSpace: "nowrap",
-            mt: 2,
+            overflow: "auto",
+            height: "24vh",
+            width: { xs: "280px", sm: "auto" },
+            // Scrollbar styling for webkit browsers (Chrome, Safari, newer versions of Edge)
+            "&::-webkit-scrollbar": {
+              width: "6px",
+            },
+            "&::-webkit-scrollbar-track": {
+              background: "rgba(0, 0, 0, 0.1)",
+            },
+            "&::-webkit-scrollbar-thumb": {
+              background: "rgba(0, 0, 0, 0.2)",
+              borderRadius: "3px",
+            },
+            "&::-webkit-scrollbar-thumb:hover": {
+              background: "rgba(0, 0, 0, 0.3)",
+            },
+            // Scrollbar styling for Firefox
+            scrollbarWidth: "thin",
+            scrollbarColor: "rgba(0, 0, 0, 0.2) rgba(0, 0, 0, 0.1)",
           }}
         >
-          <TableHead>
-            <TableRow>
-              <TableCell>
-                <Typography variant="subtitle2" fontWeight={600}>
-                  Command
-                </Typography>
-              </TableCell>
-              <TableCell>
-                <Typography variant="subtitle2" fontWeight={600}>
-                  Error
-                </Typography>
-              </TableCell>
-              <TableCell align="right">
-                <Typography variant="subtitle2" fontWeight={600}>
-                  Count
-                </Typography>
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {compiledData.map((error, index) => (
-              <TableRow key={index}>
+          <Table
+            aria-label="simple table"
+            sx={{
+              whiteSpace: "nowrap",
+              mt: 2,
+              "& tbody tr": {
+                transition: "background-color 0.3s",
+              },
+              "& tbody tr:hover": {
+                backgroundColor: "rgba(50, 50, 50, 0.1)",
+              },
+            }}
+          >
+            <TableHead>
+              <TableRow>
                 <TableCell>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignitems: "center",
-                    }}
-                  >
-                    <Box>
-                      <Typography variant="subtitle1" fontWeight={600}>
-                        {error.command}
-                      </Typography>
-                      <Typography
-                        color="textSecondary"
-                        sx={{
-                          fontSize: "12px",
-                        }}
-                      >
-                        {error.error}
-                      </Typography>
-                    </Box>
-                  </Box>
+                  <Typography variant="subtitle2" fontWeight={600}>
+                    Command
+                  </Typography>
                 </TableCell>
                 <TableCell>
-                  <Typography
-                    color="textSecondary"
-                    variant="subtitle1"
-                    fontWeight={399}
-                  >
-                    {error.command}
+                  <Typography variant="subtitle2" fontWeight={600}>
+                    Error
                   </Typography>
                 </TableCell>
                 <TableCell align="right">
-                  <Typography variant="h5">{error.count}</Typography>
+                  <Typography variant="subtitle2" fontWeight={600}>
+                    Count
+                  </Typography>
                 </TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </Box>
+            </TableHead>
+            <TableBody>{parseErrorResponse(errorData)}</TableBody>
+          </Table>
+        </Box>
+        <Modal open={isModalOpen} onClose={handleCloseModal}>
+          <MarkDownPopup errorData={selectedError} />
+        </Modal>
+      </>
     </DashboardCard>
   );
 };
-
-//{products.map((product) => (
-//<TableRow key={product.name}>
-//<TableCell>
-//<Box
-//sx={{
-//display: "flex",
-//alignItems: "center",
-//}}
-//>
-//<Box>
-//<Typography variant="subtitle1" fontWeight={600}>
-//{product.name}
-//</Typography>
-//<Typography
-//color="textSecondary"
-//sx={{
-//fontSize: "12px",
-//}}
-//>
-//{product.post}
-//</Typography>
-//</Box>
-//</Box>
-//</TableCell>
-//<TableCell>
-//<Typography
-//color="textSecondary"
-//variant="subtitle1"
-//fontWeight={399}
-//>
-//{product.pname}
-//</Typography>
-//</TableCell>
-//<TableCell>
-//<Chip
-//sx={{
-//px: "3px",
-//backgroundColor: product.pbg,
-//color: "#fff",
-//}}
-//size="small"
-//label={product.priority}
-//></Chip>
-//</TableCell>
-//<TableCell align="right">
-//<Typography variant="h5">${product.budget}k</Typography>
-//</TableCell>
-//</TableRow>
-//))}
 
 export default FrequentErrors;
