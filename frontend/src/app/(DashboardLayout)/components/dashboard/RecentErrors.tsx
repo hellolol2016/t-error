@@ -67,16 +67,14 @@ const RecentErrors = () => {
             </div>
 
             <div className="search-container">
-                <div className="terminal-item-header">
-                    <Search size={16} className="chevron-icon" />
-                    <input
-                        type="text"
-                        value={searchTerm}
-                        onChange={handleSearch}
-                        placeholder="Search users..."
-                        className="search-input"
-                    />
-                </div>
+                <Search size={16} className="search-icon" />
+                <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={handleSearch}
+                    placeholder="Search users..."
+                    className="search-input"
+                />
                 {searchResults.length > 0 && (
                     <div className="search-results">
                         {searchResults.map(user => (
@@ -107,4 +105,5 @@ const RecentErrors = () => {
         </div>
     );
 };
-    export default RecentErrors;
+
+export default RecentErrors;
