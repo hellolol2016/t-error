@@ -22,16 +22,16 @@ app.use(bodyParser.json());
 // Route to receive error data
 app.post('/errors', async (req, res) => {
   try {
-    const { uniqueId, errorData } = req.body;
+    const { uniqueId, errorData, timestamp, username } = req.body;
 
     // Validate input
-    if (!uniqueId || !errorData) {
+    if (!uniqueId || !errorData || !username) {
       return res.status(400).json({ message: 'uniqueId and errorData are required.' });
     }
 
-    logService.writeErrorLog({ uniqueId, errorData });
+    logService.writeErrorLog({ uniqueId, errorData, timestamp, username });
 
-    console.log('Received and saved error data:', errorData);
+    console.log('Received and saved error data:', { uniqueId, errorData, timestamp, username });
     res.status(201).json({ message: 'Error data received and saved.', id: 0 });
   } catch (error) {
     if (error.code === 11000) {
@@ -45,21 +45,21 @@ app.post('/errors', async (req, res) => {
 });
 
 // Route to retrieve error data by uniqueId
-app.get('/errors/:uniqueId', async (req, res) => {
-  try {
-    const { uniqueId } = req.params;
+app.get('/errors/:uniqueId/:username', async (req, res) => {
+    try {
+        const { uniqueId, username } = req.params;
 
-    const errorLog = await logService.readErrorLogs({});
+        const errorLog = await logService.readErrorLogs({ uniqueId, username });
 
-    if (!errorLog) {
-      return res.status(404).json({ message: 'Error data not found.' });
+        if (!errorLog) {
+            return res.status(404).json({ message: 'Error data not found.' });
+        }
+
+        res.status(200).json(errorLog);
+    } catch (error) {
+        console.error('Error retrieving data:', error);
+        res.status(500).json({ message: 'Internal server error.' });
     }
-
-    res.status(200).json(errorLog);
-  } catch (error) {
-    console.error('Error retrieving data:', error);
-    res.status(500).json({ message: 'Internal server error.' });
-  }
 });
 
 // Basic route to test server
