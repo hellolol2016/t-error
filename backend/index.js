@@ -61,7 +61,6 @@ app.post("/writeSolution", async (req, res) => {
 		res.status(201).json({ message: "Error data received and saved.", id: 0 });
 	} catch (error) {
 		if (error.code === 11000) {
-		// Duplicate uniqueId error
 			res.status(409).json({ message: "uniqueId already exists." });
 		} else {
 			console.error("Error saving data:", error);

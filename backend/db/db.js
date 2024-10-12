@@ -1,6 +1,7 @@
 import ErrorLog from "./errorSchema.js";
 import GroupLog from "./groupSchema.js";
 import SolutionLog from "./solutionSchema.js";
+import { v4 as uuidv4 } from 'uuid';
 
 class LogService {
   	async writeErrorLog(errorLogData) {
@@ -37,12 +38,16 @@ class LogService {
 
 	async writeSolution(solution) {
 		try {
-			const newSolution = new SolutionLog(solution);
+			console.log(solution);
+
+			const uniqueId = uuidv4();
+
+			const newSolution = new SolutionLog({uniqueId, description: solution.description, commands: solution.commands});
 			await newSolution.save();
 		
-			console.log(
-				`[mongodb] new error log inserted with uniqueId: ${newSolution.uniqueId}`
-			);
+			// console.log(
+			// 	`[mongodb] new error log inserted with uniqueId: ${newSolution.uniqueId}`
+			// );
 			
 			const groupId = solution.groupId;
 
