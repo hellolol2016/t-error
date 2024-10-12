@@ -38,6 +38,12 @@ const Menuitems = [
     icon: IconUserPlus,
     href: "/authentication/register",
   },
+  {
+    id: uniqueId(),
+    title: "Markdown Renderer",
+    icon:IconMoodHappy ,
+    href: "/markdown/render",
+  },
 ];
 
 export default Menuitems;

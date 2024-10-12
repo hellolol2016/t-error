@@ -8,30 +8,7 @@ import ErrorOverview from "@/app/(DashboardLayout)/components/dashboard/ErrorOve
 import { useEffect, useState } from "react";
 import { ErrorProvider } from "./context/ErrorContext";
 
-const fetchErrorData = async () => {
-  const res = await fetch("http://localhost:3001/errors");
-  if (!res.ok) {
-    throw new Error("Failed to fetch error data");
-  }
-  const data = await res.json();
-  return data;
-};
-export const errorData = fetchErrorData();
-
 const Dashboard = () => {
-  useEffect(() => {
-    const getData = async () => {
-      try {
-        const data = await fetchErrorData();
-        setErrors(data);
-      } catch (e) {
-        console.error(e);
-      }
-    };
-    getData();
-  }, []);
-  const [errors, setErrors] = useState([]);
-
   return (
     <ErrorProvider>
       <PageContainer
