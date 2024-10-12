@@ -8,7 +8,7 @@ import RecentTransactions from '@/app/(DashboardLayout)/components/dashboard/Rec
 import ProductPerformance from '@/app/(DashboardLayout)/components/dashboard/ProductPerformance';
 import MonthlyEarnings from '@/app/(DashboardLayout)/components/dashboard/MonthlyEarnings';
 
-
+// @ts-ignore
 export const errorData = [
     {
         "_id": "6709fb6960c5e6774c0a1b54",
