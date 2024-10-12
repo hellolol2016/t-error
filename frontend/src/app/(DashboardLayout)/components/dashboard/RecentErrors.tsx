@@ -1,4 +1,3 @@
-import { errorData } from "../../page";
 import { ChevronRight, Search } from "lucide-react";
 import "./RecentErrors.css";
 import React, { useContext, useState } from "react";
@@ -38,14 +37,6 @@ interface User {
   name: string;
 }
 
-interface Error {
-  timestamp: string;
-  errorData: {
-    command: string;
-    error: string;
-  };
-}
-
 const RecentErrors = () => {
   const errorData = useContext(ErrorContext) ?? [];
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -78,43 +69,15 @@ const RecentErrors = () => {
         <span className="terminal-title">Terminal - Error Logs</span>
       </div>
 
-            <div className="search-container">
-                <Search size={16} className="search-icon" />
-                <input
-                    type="text"
-                    value={searchTerm}
-                    onChange={handleSearch}
-                    placeholder="Search users..."
-                    className="search-input"
-                />
-                {searchResults.length > 0 && (
-                    <div className="search-results">
-                        {searchResults.map(user => (
-                            <div key={user.id} className="search-result">
-                                {user.name}
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </div>
-
-            <div className="terminal-content">
-                {errorData.map((error, index) => (
-                    <div key={index} className="terminal-item">
-                        <div className="terminal-item-header">
-                            <ChevronRight className="chevron-icon" size={16} />
-                            <span className="terminal-timestamp">{formatTimestamp(error.timestamp)}</span>
-                        </div>
-                        <div className="terminal-command">
-                            $ {error.errorData.command}
-                        </div>
-                        <div className="terminal-error">
-                            Error: {error.errorData.error}
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </div>
+      <div className="search-container">
+        <Search size={16} className="search-icon" />
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={handleSearch}
+          placeholder="Search users..."
+          className="search-input"
+        />
         {searchResults.length > 0 && (
           <div className="search-results">
             {searchResults.map((user) => (
