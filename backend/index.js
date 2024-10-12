@@ -9,7 +9,7 @@ import LogService from './db/db.js';
 const COLLECTION_NAME = "errorLogs";
 
 const app = express();
-const port = 3000;
+const port = 8000;
 
 const mongodbService = new MongoDBService();
 await mongodbService.connect();
@@ -22,8 +22,9 @@ app.use(bodyParser.json());
 // Route to receive error data
 app.post('/errors', async (req, res) => {
   try {
+    console.log('Received error data:', req.body);
     const { uniqueId, errorData, timestamp, username } = req.body;
-
+    
     // Validate input
     if (!uniqueId || !errorData || !username) {
       return res.status(400).json({ message: 'uniqueId and errorData are required.' });
