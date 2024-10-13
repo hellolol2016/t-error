@@ -18,7 +18,6 @@ export const ErrorProvider: React.FC<ErrorProviderProps> = ({ children }) => {
   const [errors, setErrors] = useState<Error[]>([]);
 
   useEffect(() => {
-    console.log(process.env.NEXT_PUBLIC_API_URL);
     const fetchErrorData = async () => {
       try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/errors`);
