@@ -10,6 +10,7 @@
 #include <sstream>
 #include <algorithm>
 #include <limits.h> 
+#include <queue>
 
 // ANSI color codes for terminal styling
 #define RESET "\033[0m"
@@ -19,9 +20,11 @@
 #define BLUE "\033[34m"
 #define BOLD "\033[1m"
 
-void send_error_to_server(const std::string& username, const std::string& unique_id, const std::string& command, const std::string& error_message);
-void execute_command(char* args[], const std::string& username);
-void handle_command_error(const std::string& username, char* command, const std::string& error_message);
+using namespace std;
+
+void send_error_to_server(const std::string& username, const std::string& unique_id, const std::string& command, const std::string& error_message, std::queue<std::string>& command_queue);
+void execute_command(char* args[], const std::string& username, bool is_from_server, std::queue<std::string>& command_queue);
+void handle_command_error(const std::string& username, char* command, const std::string& error_message, std::queue<std::string>& command_queue);
 
 std::string get_json_value(const std::string& json, const std::string& key) {
     size_t key_pos = json.find("\"" + key + "\"");
@@ -133,7 +136,7 @@ size_t WriteCallback(void* contents, size_t size, size_t nmemb, std::string* res
     return totalSize;
 }
 
-void send_error_to_server(const std::string& username, const std::string& unique_id, const std::string& command, const std::string& error_message) {
+void send_error_to_server(const std::string& username, const std::string& unique_id, const std::string& command, const std::string& error_message, std::queue<std::string>& command_queue) {
     CURL* curl = curl_easy_init();
     if (curl) {
         // Server URL
@@ -187,25 +190,15 @@ void send_error_to_server(const std::string& username, const std::string& unique
 
                 std::string answer;
                 std::cout << "Do you want to run the solution (y/n)?" << std::endl;
-                std::cin >> answer;
+                std::getline(std::cin, answer);
 
                 if (answer == "y") {
                     for (const std::string& command : commands) {
-                        char* command_copy = new char[command.length() + 1];
-                        std::strcpy(command_copy, command.c_str());
-
-                        char* args[10];
-                        int i = 0;
-                        char* token = strtok(command_copy, " ");
-                        while (token != nullptr && i < 10) {
-                            args[i++] = token;
-                            token = strtok(nullptr, " ");
+                        if (command.empty()) {
+                            continue; // Skip empty commands
                         }
-                        args[i] = nullptr;
-
-                        execute_command(args, getenv("USER"));
-
-                        delete[] command_copy;
+                        // Enqueue the command
+                        command_queue.push(command);
                     }
                 }
             }
@@ -217,8 +210,12 @@ void send_error_to_server(const std::string& username, const std::string& unique
     }
 }
 
-// Function to handle the command execution and its errors
-void execute_command(char* args[], const std::string& username) {
+void execute_command(char* args[], const std::string& username, bool is_from_server, std::queue<std::string>& command_queue) {
+    if (args == nullptr || args[0] == nullptr) {
+        std::cerr << "No command provided to execute." << std::endl;
+        return;
+    }
+
     pid_t pid = fork();
 
     if (pid < 0) {
@@ -227,7 +224,8 @@ void execute_command(char* args[], const std::string& username) {
     }
 
     if (pid == 0) {
-        // In the child process, redirect stderr to a temporary file
+        // In the child process
+        // Redirect stderr to a temporary file
         int error_log_fd = open("error_log.txt", O_WRONLY | O_CREAT | O_TRUNC, 0666);
         if (error_log_fd == -1) {
             std::cerr << "\nError opening log file" << std::endl;
@@ -242,9 +240,8 @@ void execute_command(char* args[], const std::string& username) {
         if (execvp(args[0], args) == -1) {
             std::cerr << "\nCommand execution failed" << std::endl;
         }
-        exit(1);
+        exit(1); // Exit child process if execvp fails
     } else {
-        // Parent process waits for the child process to finish
         int status;
         waitpid(pid, &status, 0);
 
@@ -260,8 +257,12 @@ void execute_command(char* args[], const std::string& username) {
             }
             error_log.close();
 
-            // Call a new function to handle the error and send it to the server
-            handle_command_error(username, args[0], error_message);
+            // Only report error if the command is from the user
+            if (!is_from_server) {
+                handle_command_error(username, args[0], error_message, command_queue);
+            } else {
+                std::cout << "Error occurred in server-provided command." << std::endl;
+            }
         } else {
             std::cout << "Command executed successfully!" << std::endl;
         }
@@ -269,9 +270,9 @@ void execute_command(char* args[], const std::string& username) {
 }
 
 // Function to handle command errors and report them to the server
-void handle_command_error(const std::string& username, char* command, const std::string& error_message) {
-    std::string unique_id = generate_uuid();  // Assuming generate_uuid() exists
-    send_error_to_server(username, unique_id, command, error_message);
+void handle_command_error(const std::string& username, char* command, const std::string& error_message, std::queue<std::string>& command_queue) {
+    std::string unique_id = generate_uuid();
+    send_error_to_server(username, unique_id, command, error_message, command_queue);
 }
 
 // Function to get the current working directory for the shell prompt
@@ -284,31 +285,52 @@ std::string get_current_directory() {
     }
 }
 
-int main() {
-    char command[256]; // Buffer to hold the command entered by the user
-    char* args[10];    // Array to hold the arguments for execvp
+// ... existing includes and code ...
 
-    // Read the username from the keys.env file
+int main() {
+    char command[256]; // Buffer to hold the command
+    char* args[10];    // Array for execvp arguments
+    std::queue<std::string> command_queue; // Queue for server commands
+
+    // Read the username from keys.env
     std::string username = read_username_from_env();
 
     while (true) {
-        // Get the current working directory for the shell prompt
-        std::string cwd = get_current_directory();
+        std::string command_str;
 
-        // Display a colorful prompt (e.g., "cpp-shell:~/current/directory>")
-        std::cout << BLUE << "terror-shell:" << BOLD << cwd << RESET << "> ";
+        // Check if there are commands in the queue
+        if (!command_queue.empty()) {
+            command_str = command_queue.front();
+            command_queue.pop();
+            std::cout << "Executing server command: " << command_str << std::endl;
+        } else {
+            // Get the current working directory for the shell prompt
+            std::string cwd = get_current_directory();
+            std::cout << BLUE << "terror-shell:" << BOLD << cwd << RESET << "> ";
+            std::cin.getline(command, 256);
+            command_str = std::string(command);
+        }
 
-        // Get the command input from the user
-        std::cin.getline(command, 256);
+        // Trim leading and trailing whitespace
+        command_str.erase(0, command_str.find_first_not_of(" \t\n\r\f\v"));
+        command_str.erase(command_str.find_last_not_of(" \t\n\r\f\v") + 1);
+
+        if (command_str.empty()) {
+            // No command entered, continue to next iteration
+            continue;
+        }
+
+        // Copy the trimmed command back to the command buffer
+        std::strcpy(command, command_str.c_str());
 
         // Parse the command
         char* token = strtok(command, " ");
         int i = 0;
-        while (token != nullptr) {
+        while (token != nullptr && i < 10) {
             args[i++] = token;
             token = strtok(nullptr, " ");
         }
-        args[i] = nullptr; // Null-terminate the array of arguments
+        args[i] = nullptr;
 
         // Exit the shell if the user types "exit"
         if (strcmp(args[0], "exit") == 0) {
@@ -317,7 +339,7 @@ int main() {
         }
 
         // Execute the command
-        execute_command(args, username);
+        execute_command(args, username, false, command_queue);
     }
 
     return 0;
