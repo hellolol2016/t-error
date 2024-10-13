@@ -4,7 +4,7 @@ import PageContainer from "@/app/(DashboardLayout)/components/container/PageCont
 // components
 import RecentErrors from "@/app/(DashboardLayout)/components/dashboard/RecentErrors";
 import FrequentErrors from "@/app/(DashboardLayout)/components/dashboard/FrequentErrors";
-import ErrorOverview from "@/app/(DashboardLayout)/components/dashboard/ErrorOverview";
+import ErrorHistory from "@/app/(DashboardLayout)/components/dashboard/ErrorHistory";
 import { useEffect, useState } from "react";
 import { ErrorProvider } from "./context/ErrorContext";
 
@@ -21,7 +21,7 @@ const Dashboard = () => {
               <RecentErrors />
             </Grid>
             <Grid item xs={12} lg={5}>
-              <ErrorOverview />
+              <ErrorHistory />
             </Grid>
             <Grid item xs={12} lg={6}>
               <FrequentErrors />

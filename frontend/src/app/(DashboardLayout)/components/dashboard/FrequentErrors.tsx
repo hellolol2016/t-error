@@ -55,6 +55,13 @@ const FrequentErrors: React.FC = () => {
     setSelectedError(null);
   };
 
+  const truncateString = (str: string, maxLength: number = 65): string => {
+    if (str.length <= maxLength) {
+      return str;
+    }
+    return str.slice(0, maxLength) + "...";
+  };
+
   const parseErrorResponse = (data: ErrorGroup[]) => {
     return data.map((group, index) => (
       <TableRow key={index} onClick={() => handleRowClick(group)}>
@@ -64,8 +71,11 @@ const FrequentErrors: React.FC = () => {
               <Typography variant="subtitle1" fontWeight={600}>
                 {group.representative.command}
               </Typography>
-              <Typography color="textSecondary" sx={{ fontSize: "12px" }}>
-                {group.representative.error}
+              <Typography
+                color="textSecondary"
+                sx={{ fontSize: "12px", color: "red" }}
+              >
+                {truncateString(group.representative.error)}
               </Typography>
             </Box>
           </Box>
@@ -80,7 +90,7 @@ const FrequentErrors: React.FC = () => {
   };
 
   return (
-    <DashboardCard title="Frequent Errors">
+    <DashboardCard title="Error Frequency - click one to add solution">  
       <>
         <Box
           sx={{
@@ -89,7 +99,7 @@ const FrequentErrors: React.FC = () => {
             width: { xs: "280px", sm: "auto" },
             // Scrollbar styling for webkit browsers (Chrome, Safari, newer versions of Edge)
             "&::-webkit-scrollbar": {
-              width: "6px",
+              width: "3px",
             },
             "&::-webkit-scrollbar-track": {
               background: "rgba(0, 0, 0, 0.1)",
@@ -110,7 +120,7 @@ const FrequentErrors: React.FC = () => {
             aria-label="simple table"
             sx={{
               whiteSpace: "nowrap",
-              mt: 2,
+              mt: 0,
               "& tbody tr": {
                 transition: "background-color 0.3s",
               },
@@ -119,20 +129,6 @@ const FrequentErrors: React.FC = () => {
               },
             }}
           >
-            <TableHead>
-              <TableRow>
-                <TableCell>
-                  <Typography variant="subtitle2" fontWeight={600}>
-                    Command
-                  </Typography>
-                </TableCell>
-                <TableCell align="right">
-                  <Typography variant="subtitle2" fontWeight={600}>
-                    Count
-                  </Typography>
-                </TableCell>
-              </TableRow>
-            </TableHead>
             <TableBody>{parseErrorResponse(errorData)}</TableBody>
           </Table>
         </Box>

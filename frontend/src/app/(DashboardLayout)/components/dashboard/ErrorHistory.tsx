@@ -51,7 +51,7 @@ const ErrorOverview = () => {
   const seriesData = Object.values(groupedData);
 
   return (
-    <DashboardCard title="Error Frequency History">
+    <DashboardCard title="Error History">
       <Box
         sx={{
           width: "100%",
