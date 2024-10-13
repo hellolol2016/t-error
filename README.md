@@ -25,7 +25,7 @@ Want to debug the elusive issues developers run into in the terminal? Adopt T-Er
 
 You can view a live demo of the project [here](https://hackharvard2024-2jvq.vercel.app/).
 
-![T-Error Demo](public/t-err_demo.gif)
+![T-Error Demo](t-err_demo.gif)
 
 ## Installation
 
