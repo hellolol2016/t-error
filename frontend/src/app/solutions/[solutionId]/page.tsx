@@ -18,10 +18,11 @@ const SolutionPage = () => {
     // Fetch the solution markdown from the API endpoint
     const fetchSolution = async () => {
       try {
-        setMarkdown("hello world");
-        // const response = await fetch(`http://localhost:3001/solutions/${solutionId}`);
-        // const data = await response.json();
-        // setMarkdown(data.markdown); // Assuming the API returns an object with a 'markdown' field
+        let url = `${process.env.NEXT_PUBLIC_API_URL}/getSolution/${solutionId}`;
+        console.log(url);
+        const response = await fetch(url);
+        const data = await response.json();
+        setMarkdown(data[0].description); // Assuming the API returns an object with a 'markdown' field
       } catch (error) {
         console.error("Error fetching solution:", error);
       }
