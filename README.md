@@ -23,7 +23,7 @@ Want to debug the elusive issues developers run into in the terminal? Adopt T-Er
 
 ## 🌐 Live demo
 
-You can view a live demo of the project [here](https://hackharvard2024-2jvq.vercel.app/).
+You can view a live demo of the project [here](https://t-err.vercel.app/).
 
 ![T-Error Demo](t-err_demo.gif)
 
