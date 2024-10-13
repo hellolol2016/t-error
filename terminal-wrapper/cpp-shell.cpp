@@ -176,9 +176,6 @@ void send_error_to_server(const std::string& username, const std::string& unique
         if (res != CURLE_OK) {
             std::cerr << "\nFailed to send error to server: " << curl_easy_strerror(res) << std::endl;
         } else {
-            std::cout << "\nError data sent to server successfully!" << std::endl;
-            std::cout << "Server Response: " << response_string << std::endl;
-
             // Handle JSON parsing and running commands based on the server response
             if (http_code == 200) {
                 std::string status = get_json_value(response_string, "status");
@@ -259,7 +256,13 @@ void execute_command(char* args[], const std::string& username, bool is_from_ser
 
             // Only report error if the command is from the user
             if (!is_from_server) {
-                handle_command_error(username, args[0], error_message, command_queue);
+                std::string full_command = "";
+                for (int i = 0; args[i] != nullptr; ++i) {
+                    if (i > 0) full_command += " ";
+                    full_command += args[i];
+                } 
+
+                handle_command_error(username, (char*)full_command.c_str(), error_message, command_queue);
             } else {
                 std::cout << "Error occurred in server-provided command." << std::endl;
             }
