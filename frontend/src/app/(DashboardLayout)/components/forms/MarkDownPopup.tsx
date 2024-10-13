@@ -39,6 +39,12 @@ const getCommands = (markdown: string) => {
   }
   return commands;
 };
+const truncateString = (str: string, maxLength: number = 50): string => {
+  if (str.length <= maxLength) {
+    return str;
+  }
+  return str.slice(0, maxLength) + "...";
+};
 
 const MarkDownPopup: React.FC<MarkDownPopupProps> = ({ errorData }) => {
   const [markdown, setMarkdown] = React.useState<string>("");
@@ -72,7 +78,7 @@ const MarkDownPopup: React.FC<MarkDownPopupProps> = ({ errorData }) => {
       <Typography sx={{ mb: 1.5, fontSize: "1rem" }}>
         <strong>Error:</strong>{" "}
         <Typography component="span" sx={{ color: "red" }}>
-          {errorData.representative.error}
+          {truncateString(errorData.representative.error)}
         </Typography>
       </Typography>
       <Typography sx={{ mb: 1.5, fontSize: "1rem" }}>

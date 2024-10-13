@@ -56,6 +56,12 @@ const RecentErrors = () => {
       setSearchResults([]);
     }
   };
+  const truncateString = (str: string, maxLength: number = 250): string => {
+    if (str.length <= maxLength) {
+      return str;
+    }
+    return str.slice(0, maxLength) + "...";
+  };
 
   return (
     <div className="terminal-container">
@@ -91,7 +97,7 @@ const RecentErrors = () => {
                 $ {error.errorData.command}
               </div>
               <div className="terminal-error">
-                Error: {error.errorData.error}
+                Error: {truncateString(error.errorData.error)}
               </div>
             </div>
           )
