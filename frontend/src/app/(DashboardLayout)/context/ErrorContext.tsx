@@ -25,7 +25,7 @@ export const ErrorProvider: React.FC<ErrorProviderProps> = ({ children }) => {
           throw new Error("Failed to fetch error data");
         }
         const data = await res.json();
-        setErrors(data);
+        setErrors(data.reverse());
       } catch (e) {
         console.error(e);
       }
