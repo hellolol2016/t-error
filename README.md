@@ -21,6 +21,12 @@ Want to debug the elusive issues developers run into in the terminal? Adopt T-Er
 - Data visualization of the error trends, which commands are screwing up the devs? 📊
 - Solution database - find the solution to your error, right through your terminal! ✅
 
+## 🌐 Live demo
+
+You can view a live demo of the project [here](https://hackharvard2024-2jvq.vercel.app/).
+
+![T-Error Demo](t-err_demo.gif)
+
 ## Installation
 
 1. Clone the repository:
@@ -65,6 +71,4 @@ Want to debug the elusive issues developers run into in the terminal? Adopt T-Er
 
 1. Open your browser and navigate to `http://localhost:3000`.
 
-## 🌐 Live demo
 
-You can view a live demo of the project [here](https://hackharvard2024-2jvq.vercel.app/).
