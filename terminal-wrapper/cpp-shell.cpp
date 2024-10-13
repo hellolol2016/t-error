@@ -9,15 +9,73 @@
 #include <uuid/uuid.h>
 #include <sstream>
 #include <algorithm>
-#include <limits.h> // For PATH_MAX
+#include <limits.h> 
+#include <queue>
 
-// ANSI color codes for terminal styling
 #define RESET "\033[0m"
 #define RED "\033[31m"
 #define GREEN "\033[32m"
 #define YELLOW "\033[33m"
 #define BLUE "\033[34m"
 #define BOLD "\033[1m"
+
+using namespace std;
+
+void send_error_to_server(const std::string& username, const std::string& unique_id, const std::string& command, const std::string& error_message, std::queue<std::string>& command_queue);
+void execute_command(char* args[], const std::string& username, bool is_from_server, std::queue<std::string>& command_queue);
+void handle_command_error(const std::string& username, char* command, const std::string& error_message, std::queue<std::string>& command_queue);
+
+std::string get_json_value(const std::string& json, const std::string& key) {
+    size_t key_pos = json.find("\"" + key + "\"");
+    if (key_pos != std::string::npos) {
+        size_t start = json.find(":", key_pos);
+        size_t end = json.find(",", start);
+        if (end == std::string::npos) {
+            end = json.find("}", start);
+        }
+        std::string value = json.substr(start + 1, end - start - 1);
+        // Remove potential surrounding quotes
+        value.erase(remove(value.begin(), value.end(), '\"'), value.end());
+        return value;
+    }
+    return "";
+}
+
+// Function to parse a JSON array into a vector of strings
+std::vector<std::string> get_json_array(const std::string& json, const std::string& key) {
+    std::vector<std::string> result;
+    size_t key_pos = json.find("\"" + key + "\"");
+    if (key_pos != std::string::npos) {
+        size_t start = json.find("[", key_pos);
+        size_t end = json.find("]", start);
+        std::string array_string = json.substr(start + 1, end - start - 1);
+
+        size_t pos = 0;
+        while ((pos = array_string.find("\"")) != std::string::npos) {
+            size_t end_quote = array_string.find("\"", pos + 1);
+            std::string item = array_string.substr(pos + 1, end_quote - pos - 1);
+            result.push_back(item);
+            array_string = array_string.substr(end_quote + 1);
+        }
+    }
+    return result;
+}
+
+// Function to parse the JSON response
+void parse_json_response(const std::string& response_string) {
+    std::string status = get_json_value(response_string, "status");
+    std::string link = get_json_value(response_string, "supalink");
+    std::vector<std::string> commands = get_json_array(response_string, "commands");
+
+    // Output the parsed values
+    std::cout << "Status: " << status << std::endl;
+    std::cout << "Link: " << link << std::endl;
+    std::cout << "Commands: ";
+    for (const auto& cmd : commands) {
+        std::cout << cmd << " ";
+    }
+    std::cout << std::endl;
+}
 
 // Function to read the username from keys.env
 std::string read_username_from_env() {
@@ -48,7 +106,6 @@ std::string generate_uuid() {
     return std::string(uuid_str);
 }
 
-// Function to escape special characters in a string to make it JSON-safe
 std::string escape_json_string(const std::string& input) {
     std::ostringstream ss;
     for (char c : input) {
@@ -71,14 +128,17 @@ std::string escape_json_string(const std::string& input) {
     return ss.str();
 }
 
-// Function to send error data to the server as a JSON object using libcurl
-void send_error_to_server(const std::string& username, const std::string& unique_id, const std::string& command, const std::string& error_message) {
+size_t WriteCallback(void* contents, size_t size, size_t nmemb, std::string* response) {
+    size_t totalSize = size * nmemb;
+    response->append((char*)contents, totalSize);
+    return totalSize;
+}
+
+void send_error_to_server(const std::string& username, const std::string& unique_id, const std::string& command, const std::string& error_message, std::queue<std::string>& command_queue) {
     CURL* curl = curl_easy_init();
-    if(curl) {
-        // Server URL
+    if (curl) {
         std::string url = "http://localhost:3001/errors";
 
-        // Create a JSON payload using stringstream, with escaped error message and new structure
         std::stringstream json_payload;
         json_payload << "{"
                      << "\"uniqueId\":\"" << unique_id << "\","
@@ -88,33 +148,118 @@ void send_error_to_server(const std::string& username, const std::string& unique
                      << "\"error\":\"" << escape_json_string(error_message) << "\""
                      << "}}";
 
-        // Convert the stringstream to a string
         std::string json_data = json_payload.str();
-
-        // Setup the request
         curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json_data.c_str());
 
-        // Set the content-type header to JSON
         struct curl_slist* headers = NULL;
         headers = curl_slist_append(headers, "Content-Type: application/json");
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
-        // Perform the request
+        std::string response_string;
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_string);
+
         CURLcode res = curl_easy_perform(curl);
-        if(res != CURLE_OK) {
-            std::cerr << RED << "\nFailed to send error to server: " << curl_easy_strerror(res) << RESET << std::endl;
+
+        long http_code = 0;
+        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
+
+        if (res != CURLE_OK) {
+            std::cerr << "\nFailed to send error to server: " << curl_easy_strerror(res) << std::endl;
         } else {
-            std::cout << GREEN << "\nError data sent to server successfully!" << RESET << std::endl;
+            if (http_code == 200) {
+                std::string status = get_json_value(response_string, "status");
+                std::string link = get_json_value(response_string, "supalink");
+                std::vector<std::string> commands = get_json_array(response_string, "commands");
+
+                std::cout << status << std::endl;
+                std::cout << link << std::endl;
+
+                std::string answer;
+                std::cout << "Do you want to run the solution (y/n)?" << std::endl;
+                std::getline(std::cin, answer);
+
+                if (answer == "y") {
+                    for (const std::string& command : commands) {
+                        if (command.empty()) {
+                            continue;
+                        }
+                        command_queue.push(command);
+                    }
+                }
+            }
         }
 
-        // Cleanup
         curl_slist_free_all(headers);
         curl_easy_cleanup(curl);
     }
 }
 
-// Function to get the current working directory for the shell prompt
+void execute_command(char* args[], const std::string& username, bool is_from_server, std::queue<std::string>& command_queue) {
+    if (args == nullptr || args[0] == nullptr) {
+        std::cerr << "No command provided to execute." << std::endl;
+        return;
+    }
+
+    pid_t pid = fork();
+
+    if (pid < 0) {
+        std::cerr << "Fork failed" << std::endl;
+        return;
+    }
+
+    if (pid == 0) {
+        int error_log_fd = open("error_log.txt", O_WRONLY | O_CREAT | O_TRUNC, 0666);
+        if (error_log_fd == -1) {
+            std::cerr << "\nError opening log file" << std::endl;
+            exit(1);
+        }
+
+        dup2(error_log_fd, STDERR_FILENO);
+        close(error_log_fd);
+
+        if (execvp(args[0], args) == -1) {
+            std::cerr << "\nCommand execution failed" << std::endl;
+        }
+        exit(1);
+    } else {
+        int status;
+        waitpid(pid, &status, 0);
+
+        if (WIFEXITED(status) && WEXITSTATUS(status) != 0) {
+            std::ifstream error_log("error_log.txt");
+            std::string error_message;
+            std::string line;
+            while (getline(error_log, line)) {
+                error_message += line + "\n";
+            }
+            error_log.close();
+
+            std::cout << error_message << std::endl;
+
+            if (!is_from_server) {
+                std::string full_command = "";
+                for (int i = 0; args[i] != nullptr; ++i) {
+                    if (i > 0) full_command += " ";
+                    full_command += args[i];
+                } 
+
+                handle_command_error(username, (char*)full_command.c_str(), error_message, command_queue);
+            } else {
+                std::cout << "Error occurred in server-provided command." << std::endl;
+            }
+        } else {
+            std::cout << "Command executed successfully!" << std::endl;
+        }
+    }
+}
+
+void handle_command_error(const std::string& username, char* command, const std::string& error_message, std::queue<std::string>& command_queue) {
+    std::string unique_id = generate_uuid();
+    send_error_to_server(username, unique_id, command, error_message, command_queue);
+}
+
 std::string get_current_directory() {
     char cwd[PATH_MAX];
     if (getcwd(cwd, sizeof(cwd)) != nullptr) {
@@ -124,95 +269,49 @@ std::string get_current_directory() {
     }
 }
 
-// Function to execute a command and handle errors
-void execute_command(char* args[], const std::string& username) {
-    pid_t pid = fork();
-
-    if (pid < 0) {
-        std::cerr << RED << "Fork failed" << RESET << std::endl;
-        return;
-    }
-
-    if (pid == 0) {
-        // In the child process
-        // Redirect stderr to a temporary file
-        int error_log_fd = open("error_log.txt", O_WRONLY | O_CREAT | O_TRUNC, 0666);
-        if (error_log_fd == -1) {
-            std::cerr << RED << "\nError opening log file" << RESET << std::endl;
-            exit(1);
-        }
-
-        // Redirect stderr to the file
-        dup2(error_log_fd, STDERR_FILENO);
-        close(error_log_fd);
-
-        // Execute the command
-        if (execvp(args[0], args) == -1) {
-            std::cerr << RED << "\nCommand execution failed" << RESET << std::endl;
-        }
-        exit(1); // Exit child process if execvp fails
-    } else {
-        // In the parent process
-        int status;
-        waitpid(pid, &status, 0); // Wait for child process to complete
-
-        if (WIFEXITED(status) && WEXITSTATUS(status) != 0) {
-            std::cout << YELLOW << "Command failed with exit code " << WEXITSTATUS(status) << RESET << std::endl;
-
-            // Read the error message from the log file
-            std::ifstream error_log("error_log.txt");
-            std::string error_message;
-            std::string line;
-            while (getline(error_log, line)) {
-                error_message += line + "\n";
-            }
-            error_log.close();
-
-            // Generate unique ID for the error
-            std::string unique_id = generate_uuid();
-
-            // Send the error data to the server
-            send_error_to_server(username, unique_id, args[0], error_message);
-        } else {
-            std::cout << GREEN << "\nCommand executed successfully!" << RESET << std::endl;
-        }
-    }
-}
-
 int main() {
-    char command[256]; // Buffer to hold the command entered by the user
-    char* args[10];    // Array to hold the arguments for execvp
+    char command[256]; 
+    char* args[10]; 
+    std::queue<std::string> command_queue;
 
-    // Read the username from the keys.env file
     std::string username = read_username_from_env();
 
     while (true) {
-        // Get the current working directory for the shell prompt
-        std::string cwd = get_current_directory();
+        std::string command_str;
 
-        // Display a colorful prompt (e.g., "cpp-shell:~/current/directory>")
-        std::cout << BLUE << "error-shell:" << BOLD << cwd << RESET << "> ";
+        if (!command_queue.empty()) {
+            command_str = command_queue.front();
+            command_queue.pop();
+            std::cout << "Executing server command: " << command_str << std::endl;
+        } else {
+            std::string cwd = get_current_directory();
+            std::cout << BLUE << "terror-shell:" << BOLD << cwd << RESET << "> ";
+            std::cin.getline(command, 256);
+            command_str = std::string(command);
+        }
 
-        // Get the command input from the user
-        std::cin.getline(command, 256);
+        command_str.erase(0, command_str.find_first_not_of(" \t\n\r\f\v"));
+        command_str.erase(command_str.find_last_not_of(" \t\n\r\f\v") + 1);
 
-        // Parse the command
+        if (command_str.empty()) {
+            continue;
+        }
+
+        std::strcpy(command, command_str.c_str());
+
         char* token = strtok(command, " ");
         int i = 0;
-        while (token != nullptr) {
+        while (token != nullptr && i < 10) {
             args[i++] = token;
             token = strtok(nullptr, " ");
         }
-        args[i] = nullptr; // Null-terminate the array of arguments
+        args[i] = nullptr;
 
-        // Exit the shell if the user types "exit"
         if (strcmp(args[0], "exit") == 0) {
             std::cout << GREEN << "\nExiting cpp-shell. Goodbye!" << RESET << std::endl;
             break;
         }
-
-        // Execute the command
-        execute_command(args, username);
+        execute_command(args, username, false, command_queue);
     }
 
     return 0;

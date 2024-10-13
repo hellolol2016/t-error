@@ -59,7 +59,7 @@ class LogService {
 
 	async getSolution(query) {
 		try {
-			const solution = await SolutionLog.find(query);
+			const solution = await SolutionLog.findOne(query);
 			return solution;
 		} catch (error) {
 			console.error("[mongodb] error writing to MongoDB:", error);

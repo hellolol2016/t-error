@@ -25,7 +25,7 @@ app.use(bodyParser.json());
 dotenv.config({ path: "./keys.env" });
 
 function generateLink(solutionId) {
-    return `http://${process.env.HOST}:${PORT}/solution/${solutionId}`;
+    return `http://${process.env.HOST}/solutions/${solutionId}`;
 }
 
 app.post("/errors", async (req, res) => {
@@ -52,9 +52,10 @@ app.post("/errors", async (req, res) => {
 			res.status(201).json({ message: "Error data received and saved."});
 		} else {
 			const solution = await logService.getSolution({uniqueId: matchedGroup.solution});
+			console.log(solution);
 			res.status(200).json({ 
 				message: "Solution for this error exists", 
-				link: generateLink(matchedGroup.solution),
+				supalink: generateLink(matchedGroup.solution),
 				commands: solution.commands });
 		}
 	} catch (error) {
@@ -119,7 +120,7 @@ app.get("/getSolution/:solutionId", async (req, res) => {
 		if (!solution) {
 			return res.status(404).json({ message: "Solution not found." });
 		}
-		
+
 		res.status(200).json(solution);
 	} catch (error) {
 		console.error("[server] error retrieving solution:", error);
