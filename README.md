@@ -67,8 +67,24 @@ You can view a live demo of the project [here](https://t-err.vercel.app/).
    npm run dev
    ```
 
+5. Set up the shell:
+   Run the command below to run on Ubunto WSL:
+   ```
+   g++ cpp-shell.cpp -l uuid -o shell -std=c++17 -lcurl
+   ```
+
 ## Usage
 
 1. Open your browser and navigate to `http://localhost:3000`.
 
+## Notes
 
+### How to fix the libcurl linker error
+
+If you are trying to build the shell and getting a long linked error output, it is likely because of libcurl. First you need to install it with
+
+`brew install curl`
+
+Then whenever you build the shell, you need to add it as a flag. To avoid warnings, also specify the std version to c++14 or newer
+
+`g++ cpp-shell.cpp -o shell -std=c++17 -lcurl`
